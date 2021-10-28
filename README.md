@@ -1,4 +1,4 @@
-# Status Bar Pomo Timer for Obsidian
+# Flexible Pomo Timer for Obsidian
 
 Simple plugin that displays a [pomodoro timer](https://en.wikipedia.org/wiki/Pomodoro_Technique) in the [Obsidian](https://obsidian.md/) status bar. 
 
