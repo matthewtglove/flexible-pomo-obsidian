@@ -61,6 +61,13 @@ Added an option so that pomodoro duration is logged.
 
 ![img_3.png](img_3.png)
 
+### Enable Normal Pomodoros For Session
+
+At the end of the pomodoro, you can have a choice to use normal pomodoros for the rest of the session. This reverts to 
+the original pomodoro mode.
+
+![img_5.png](img_5.png)
+
 ### Additional Commands
 
 #### Start Short Break
