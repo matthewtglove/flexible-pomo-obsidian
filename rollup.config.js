@@ -23,7 +23,7 @@ export default {
   },
   external: ['obsidian'],
   plugins: [
-    typescript(),
+    typescript({inlineSources: !isProd}),
     nodeResolve({browser: true}),
     commonjs(),
   ]
