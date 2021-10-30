@@ -5,9 +5,10 @@ export async function confirmWithModal(
     app: App,
     text: string,
     plugin: PomoTimerPlugin,
-    buttons: { cta: string; secondary: string } = {
+    buttons: { cta: string; secondary: string; thirdaction: string; } = {
         cta: "Yes",
-        secondary: "No"
+        secondary: "No",
+        thirdaction: "Not for this session",
     }
 ): Promise<boolean> {
     return new Promise((resolve, reject) => {
@@ -24,7 +25,7 @@ export class ExtendPomodoroModal extends Modal {
         app: App,
         plugin: PomoTimerPlugin,
         public text: string,
-        public buttons: { cta: string; secondary: string }
+        public buttons: { cta: string; secondary: string; thirdaction: string }
     ) {
         super(app);
         this._plugin = plugin;
@@ -55,6 +56,12 @@ export class ExtendPomodoroModal extends Modal {
                 .onClick(() => {
                     this.close();
                 });
+            new ButtonComponent(buttonEl)
+                .setButtonText(this.buttons.thirdaction)
+                .onClick(() => {
+                    this._plugin.timer.allowExtendedPomodoroForSession = false;
+                    this.close();
+                });    
         });
     }
     onOpen() {

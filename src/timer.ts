@@ -34,6 +34,8 @@ export class Timer {
 	extendPomodoroTime: boolean;
 	triggered: boolean;
 	extendedTime: Moment;
+	allowExtendedPomodoroForSession: boolean;
+	
 
 	constructor(plugin: PomoTimerPlugin) {
 		this.plugin = plugin;
@@ -44,6 +46,7 @@ export class Timer {
 		this.cyclesSinceLastAutoStop = 0;
 		this.extendPomodoroTime = false;
 		this.triggered = false;
+		this.allowExtendedPomodoroForSession = true;
 
 		// initialize white noise player even if it it started as false so that it can be toggled.
 		this.whiteNoisePlayer = new WhiteNoise(plugin, whiteNoiseUrl);
@@ -95,7 +98,7 @@ export class Timer {
 	async handleTimerEnd() {
 		this.triggered = true;
 		this.pauseTimer();
-		if(this.settings.allowExtendedPomodoro && this.mode === Mode.Pomo) {
+		if(this.settings.allowExtendedPomodoro && this.plugin.timer.allowExtendedPomodoroForSession && this.mode === Mode.Pomo) {
 			await confirmWithModal(this.plugin.app, "Do You Want To Extend Your Pomodoro Session ? ", this.plugin)
 		} else {
 			this.extendPomodoroTime = false;
@@ -255,7 +258,7 @@ export class Timer {
 			}
 			case (Mode.ShortBreak):
 			case (Mode.LongBreak): {
-				new Notice(`Starting ${time} ${unit} break.` + `carlo`);
+				new Notice(`Starting ${time} ${unit} break.`);
 				break;
 			}
 			case (Mode.NoTimer): {
