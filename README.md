@@ -68,6 +68,12 @@ the original pomodoro mode.
 
 ![img_5.png](img_5.png)
 
+### Better Visual Indicator
+
+Added a visual indicator based on https://github.com/third774/react-stopwatch
+
+![](betterstopwatch.gif)
+
 ### Additional Commands
 
 #### Start Short Break

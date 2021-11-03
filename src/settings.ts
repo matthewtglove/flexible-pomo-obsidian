@@ -24,6 +24,7 @@ export interface PomoSettings {
 	whiteNoise: boolean;
 	showActiveNoteInTimer: boolean;
 	allowExtendedPomodoro: boolean;
+	betterIndicator: boolean;
 }
 
 export const DEFAULT_SETTINGS: PomoSettings = {
@@ -46,6 +47,7 @@ export const DEFAULT_SETTINGS: PomoSettings = {
 	whiteNoise: false,
 	showActiveNoteInTimer: false,
 	allowExtendedPomodoro: false,
+	betterIndicator: false,
 }
 
 
@@ -272,6 +274,15 @@ export class PomoSettingTab extends PluginSettingTab {
 						this.plugin.settings.allowExtendedPomodoro = value;
 						this.plugin.saveSettings();
 					}));
+			new Setting(containerEl)
+				.setName("Allow Popup Indicator")
+				.setDesc("Allow Popup Pomodoro Indicator")
+				.addToggle(toggle => toggle
+					.setValue(this.plugin.settings.betterIndicator)
+					.onChange(value => {
+						this.plugin.settings.betterIndicator = value;
+						this.plugin.saveSettings();
+					}));		
 		}
 	}
 }

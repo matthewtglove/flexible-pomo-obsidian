@@ -8,7 +8,9 @@ import PomoTimerPlugin from './main';
 import {confirmWithModal} from "./extend_modal";
 
 
+
 const MILLISECS_IN_MINUTE = 60 * 1000;
+const electron = require('electron')
 
 export const enum Mode {
 	Pomo,
@@ -185,14 +187,22 @@ export class Timer {
 	startTimer(mode: Mode): void {
 		this.mode = mode;
 		this.paused = false;
-
 		if (this.settings.logActiveNote === true) {
 			const activeView = this.plugin.app.workspace.getActiveFile();
 			if (activeView) {
 				this.activeNote = activeView;
 			}
 		}
-
+		if(this.settings.betterIndicator === true) {
+			const remote = electron.remote;
+			const BrowserWindow = remote.BrowserWindow;
+			const win = new BrowserWindow({
+			  height: 600,
+			  width: 800
+			});
+			this.activeNote ? win.loadURL('https://grassbl8d.github.io/react-stopwatch/?taskName=' + this.activeNote.basename + '&reset=true') : win.loadURL('https://grassbl8d.github.io/react-stopwatch')
+		}
+		
 		this.setStartAndEndTime(this.getTotalModeMillisecs());
 		this.originalStartTime = moment();
 		this.modeStartingNotification();
