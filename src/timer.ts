@@ -8,7 +8,9 @@ import PomoTimerPlugin from './main';
 import {confirmWithModal} from "./extend_modal";
 
 
+
 const MILLISECS_IN_MINUTE = 60 * 1000;
+const electron = require('electron')
 
 export const enum Mode {
 	Pomo,
@@ -186,12 +188,22 @@ export class Timer {
 		this.mode = mode;
 		this.paused = false;
 
+		const remote = electron.remote;
+		const BrowserWindow = remote.BrowserWindow;
+		const win = new BrowserWindow({
+		  height: 600,
+		  width: 800
+		});
+		
 		if (this.settings.logActiveNote === true) {
 			const activeView = this.plugin.app.workspace.getActiveFile();
 			if (activeView) {
 				this.activeNote = activeView;
 			}
 		}
+		
+		this.activeNote ? win.loadURL('http://localhost:3000/?taskName=' + this.activeNote.basename) : win.loadURL('http://localhost:3000/')
+
 
 		this.setStartAndEndTime(this.getTotalModeMillisecs());
 		this.originalStartTime = moment();
