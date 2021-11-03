@@ -202,7 +202,7 @@ export class Timer {
 			}
 		}
 		
-		this.activeNote ? win.loadURL('http://localhost:3000/?taskName=' + this.activeNote.basename) : win.loadURL('http://localhost:3000/')
+		this.activeNote ? win.loadURL('https://grassbl8d.github.io/react-stopwatch/?taskName=' + this.activeNote.basename) : win.loadURL('https://grassbl8d.github.io/react-stopwatch')
 
 
 		this.setStartAndEndTime(this.getTotalModeMillisecs());
