@@ -41,7 +41,7 @@ export default class PomoTimerPlugin extends Plugin {
 		addIcon("feather-headphones", feather.icons.headphones.toString());
 
 		this.addCommand({
-			id: 'start-statusbar-pomo',
+			id: 'start-flexible-pomo',
 			name: 'Start Pomodoro',
 			icon: 'feather-play',
 			callback: () => {
@@ -52,7 +52,7 @@ export default class PomoTimerPlugin extends Plugin {
 		});
 
 		this.addCommand({
-			id: 'log-and-quit-statusbar-pomo',
+			id: 'log-and-quit-flexible-pomo',
 			name: 'Log Pomodoro Time and Quit.',
 			icon: 'feather-log-and-quit',
 			checkCallback: (checking: boolean) => {
@@ -70,7 +70,7 @@ export default class PomoTimerPlugin extends Plugin {
 		});
 
 		this.addCommand({
-			id: 'open-activenote-statusbar-pomo',
+			id: 'open-activenote-flexible-pomo',
 			name: 'Open Active Note',
 			icon: 'feather-open-active-note',
 			checkCallback: (checking: boolean) => {
@@ -93,7 +93,7 @@ export default class PomoTimerPlugin extends Plugin {
 		});
 
 		this.addCommand({
-			id: 'start-shortbreak',
+			id: 'start-flexible-pomo-shortbreak',
 			name: 'Start Short Break',
 			icon: 'feather-play',
 			callback: () => {
@@ -102,7 +102,7 @@ export default class PomoTimerPlugin extends Plugin {
 		})
 
 		this.addCommand({
-			id: 'start-longbreak',
+			id: 'start-flexible-pomo-longbreak',
 			name: 'Start Long Break',
 			icon: 'feather-play',
 			callback: () => {
@@ -111,7 +111,7 @@ export default class PomoTimerPlugin extends Plugin {
 		})
 
 		this.addCommand({
-			id: 'pause-satusbar-pomo',
+			id: 'pause-flexible-pomo',
 			name: 'Toggle timer pause',
 			checkCallback: (checking: boolean) => {
 				if (this.timer.mode !== Mode.NoTimer) {
@@ -126,7 +126,7 @@ export default class PomoTimerPlugin extends Plugin {
 		});
 
 		this.addCommand({
-			id: 'quit-satusbar-pomo',
+			id: 'quit-flexible-pomo',
 			name: 'Quit timer',
 			icon: 'feather-quit',
 			checkCallback: (checking: boolean) => {
@@ -141,7 +141,7 @@ export default class PomoTimerPlugin extends Plugin {
 		});
 
 		this.addCommand({
-			id: 'toggle-white-noise',
+			id: 'toggle-flexible-pomo-white-noise',
 			name: 'Toggle White noise',
 			icon: 'feather-headphones',
 			callback: () => {
