@@ -37,6 +37,7 @@ export class Timer {
 	triggered: boolean;
 	extendedTime: Moment;
 	allowExtendedPomodoroForSession: boolean;
+	win: any;
 	
 
 	constructor(plugin: PomoTimerPlugin) {
@@ -149,7 +150,9 @@ export class Timer {
 		this.endTime = moment(0);
 		this.paused = false;
 		this.pomosSinceStart = 0;
-
+		if(this.win) {
+			this.win.close();
+		}
 		if (this.settings.whiteNoise === true) {
 			this.whiteNoisePlayer.stopWhiteNoise();
 		}
@@ -200,6 +203,8 @@ export class Timer {
 			  height: 600,
 			  width: 800
 			});
+			this.win = win;
+
 			this.activeNote ? win.loadURL('https://grassbl8d.github.io/react-stopwatch/?taskName=' + this.activeNote.basename + '&reset=true') : win.loadURL('https://grassbl8d.github.io/react-stopwatch')
 		}
 		
