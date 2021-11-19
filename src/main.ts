@@ -41,20 +41,13 @@ export default class PomoTimerPlugin extends Plugin {
 		addIcon("feather-headphones", feather.icons.headphones.toString());
 
 		this.addCommand({
-			id: 'start-satusbar-pomo',
-			name: 'Start pomodoro',
+			id: 'start-statusbar-pomo',
+			name: 'Start Pomodoro',
 			icon: 'feather-play',
-			checkCallback: (checking: boolean) => {
-				let leaf = this.app.workspace.activeLeaf;
-				if (leaf) {
-					if (!checking) {
-						this.timer = new Timer(this);
-						this.timer.triggered = false;
-						this.timer.startTimer(Mode.Pomo);
-					}
-					return true;
-				}
-				return false;
+			callback: () => {
+				this.timer = new Timer(this);
+				this.timer.triggered = false;
+				this.timer.startTimer(Mode.Pomo);
 			}
 		});
 
@@ -63,8 +56,7 @@ export default class PomoTimerPlugin extends Plugin {
 			name: 'Log Pomodoro Time and Quit.',
 			icon: 'feather-log-and-quit',
 			checkCallback: (checking: boolean) => {
-				let leaf = this.app.workspace.activeLeaf;
-				if (leaf && this.timer.mode !== Mode.NoTimer) {
+				if (this.timer.mode === Mode.Pomo) {
 					if (!checking) {
 						this.timer.extendPomodoroTime = false;
 						this.timer.triggered = false;
@@ -82,8 +74,7 @@ export default class PomoTimerPlugin extends Plugin {
 			name: 'Open Active Note',
 			icon: 'feather-open-active-note',
 			checkCallback: (checking: boolean) => {
-				let leaf = this.app.workspace.activeLeaf;
-				if (leaf && this.timer.mode !== Mode.NoTimer) {
+				if (this.timer.activeNote && this.timer.mode === Mode.Pomo) {
 					if (!checking) {
 						let view = this.app.workspace.getActiveViewOfType(MarkdownView)
 						if ( view ) {
@@ -105,15 +96,8 @@ export default class PomoTimerPlugin extends Plugin {
 			id: 'start-shortbreak',
 			name: 'Start Short Break',
 			icon: 'feather-play',
-			checkCallback: (checking: boolean) => {
-				let leaf = this.app.workspace.activeLeaf;
-				if (leaf) {
-					if (!checking) {
-						this.timer.startTimer(Mode.ShortBreak);
-					}
-					return true;
-				}
-				return false;
+			callback: () => {
+				this.timer.startTimer(Mode.ShortBreak);
 			}
 		})
 
@@ -121,32 +105,24 @@ export default class PomoTimerPlugin extends Plugin {
 			id: 'start-longbreak',
 			name: 'Start Long Break',
 			icon: 'feather-play',
-			checkCallback: (checking: boolean) => {
-				let leaf = this.app.workspace.activeLeaf;
-				if (leaf) {
-					if (!checking) {
-						this.timer.startTimer(Mode.LongBreak);
-					}
-					return true;
-				}
-				return false;
+			callback: () => {
+				this.timer.startTimer(Mode.LongBreak);
 			}
 		})
 
 		this.addCommand({
 			id: 'pause-satusbar-pomo',
 			name: 'Toggle timer pause',
-			icon: 'feather-pause',
 			checkCallback: (checking: boolean) => {
-				let leaf = this.app.workspace.activeLeaf;
-				if (leaf && this.timer.mode !== Mode.NoTimer) {
+				if (this.timer.mode !== Mode.NoTimer) {
 					if (!checking) {
 						this.timer.togglePause();
 					}
 					return true;
 				}
 				return false;
-			}
+			},
+			icon: 'feather-pause'
 		});
 
 		this.addCommand({
@@ -154,8 +130,7 @@ export default class PomoTimerPlugin extends Plugin {
 			name: 'Quit timer',
 			icon: 'feather-quit',
 			checkCallback: (checking: boolean) => {
-				let leaf = this.app.workspace.activeLeaf;
-				if (leaf && this.timer.mode !== Mode.NoTimer) {
+				if (this.timer.mode !== Mode.NoTimer) {
 					if (!checking) {
 						this.timer.quitTimer();
 					}
@@ -169,21 +144,14 @@ export default class PomoTimerPlugin extends Plugin {
 			id: 'toggle-white-noise',
 			name: 'Toggle White noise',
 			icon: 'feather-headphones',
-			checkCallback: (checking: boolean) => {
-				let leaf = this.app.workspace.activeLeaf;
-				if (leaf && this.timer.mode === Mode.Pomo) {
-					if (!checking) {
-						if(this.settings.whiteNoise) {
-							this.settings.whiteNoise = false;
-							this.timer.whiteNoisePlayer.stopWhiteNoise();
-						} else {
-							this.settings.whiteNoise = true;
-							this.timer.whiteNoisePlayer.whiteNoise();
-						}
-					}
-					return true;
+			callback: () => {
+				if (this.settings.whiteNoise) {
+					this.settings.whiteNoise = false;
+					this.timer.whiteNoisePlayer.stopWhiteNoise();
+				} else {
+					this.settings.whiteNoise = true;
+					this.timer.whiteNoisePlayer.whiteNoise();
 				}
-				return false;
 			}
 		});
 	}
