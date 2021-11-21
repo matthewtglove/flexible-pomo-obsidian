@@ -11,9 +11,12 @@ All of these actions are available from the command pallete. You can also set a 
 
 ## Roadmap
 
-- [ ] Add summary logging for pomodoros
-- [ ] Add better task tracking for pomodoros.
-  - [ ] Include completed tasks for active note and daily note for logs.
+- [ ] Add summary logging for pomodoro
+- [ ] Add rest tracking.
+  - [ ] Add sound indicator for rest.
+  - [ ] Add rest time to logging.
+- [X] Add better task tracking for pomodoros.
+  - [X] Include completed tasks/new tasks for Active Note.
 
 
 ## Settings
@@ -80,6 +83,19 @@ the original pomodoro mode.
 Added a visual indicator based on https://github.com/third774/react-stopwatch
 
 ![](betterstopwatch.gif)
+
+### Log Pomodoro Tasks
+
+Added tracking of Pomodoro Tasks. These are the checkboxes inside. It will track all of the tasks that were ticked 
+during a Pomodoro Session of the current Active Note.
+
+Note: There is a current limitation that tracking is only based on text of files. Duplicates might not be tracked properly.
+
+![](logpomodorotasks2.png)
+
+![](logpomodorotasks.png)
+
+
 
 ### Additional Commands
 
