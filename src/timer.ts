@@ -151,7 +151,11 @@ export class Timer {
 		this.paused = false;
 		this.pomosSinceStart = 0;
 		if(this.win) {
-			this.win.close();
+			try{
+				this.win.close();
+			} catch(e) {
+				// HANDLE event that user closed stopwatch before trigggering quitTimer.
+			}
 		}
 		if (this.settings.whiteNoise === true) {
 			this.whiteNoisePlayer.stopWhiteNoise();
