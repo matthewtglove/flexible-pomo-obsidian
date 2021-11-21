@@ -1,4 +1,4 @@
-import { Notice, moment, TFolder, TFile } from 'obsidian';
+import {Notice, moment, TFolder, TFile, WorkspaceLeaf} from 'obsidian';
 import { getDailyNote, createDailyNote, getAllDailyNotes } from 'obsidian-daily-notes-interface';
 import type { Moment } from 'moment';
 import { notificationUrl, whiteNoiseUrl } from './audio_urls';
@@ -6,6 +6,7 @@ import { WhiteNoise } from './white_noise';
 import { PomoSettings } from './settings';
 import PomoTimerPlugin from './main';
 import {confirmWithModal} from "./extend_modal";
+import {PomoTaskItem} from "./pomo_task_item";
 
 
 
@@ -32,12 +33,17 @@ export class Timer {
 	pomosSinceStart: number;
 	cyclesSinceLastAutoStop: number;
 	activeNote: TFile;
+	activeLeaf: WorkspaceLeaf;
 	whiteNoisePlayer: WhiteNoise;
 	extendPomodoroTime: boolean;
 	triggered: boolean;
 	extendedTime: Moment;
 	allowExtendedPomodoroForSession: boolean;
 	win: any;
+	initialPomoTaskItems: PomoTaskItem[];
+	postPomoTaskItems: PomoTaskItem[];
+	newPomoTaskItems: PomoTaskItem[];
+	modifiedPomoTaskItems: PomoTaskItem[];
 	
 
 	constructor(plugin: PomoTimerPlugin) {
@@ -50,9 +56,16 @@ export class Timer {
 		this.extendPomodoroTime = false;
 		this.triggered = false;
 		this.allowExtendedPomodoroForSession = true;
+		// remove the reference to activenote and activeleaf.
 
 		// initialize white noise player even if it it started as false so that it can be toggled.
 		this.whiteNoisePlayer = new WhiteNoise(plugin, whiteNoiseUrl);
+		this.initialPomoTaskItems = new Array<PomoTaskItem>();
+		this.postPomoTaskItems = new Array<PomoTaskItem>();
+		this.modifiedPomoTaskItems = new Array<PomoTaskItem>();
+		this.newPomoTaskItems = new Array<PomoTaskItem>();
+		this.modifiedPomoTaskItems = new Array<PomoTaskItem>();
+
 	}
 
 	onRibbonIconClick() {
@@ -150,6 +163,7 @@ export class Timer {
 		this.endTime = moment(0);
 		this.paused = false;
 		this.pomosSinceStart = 0;
+
 		if(this.win) {
 			try{
 				this.win.close();
@@ -162,6 +176,17 @@ export class Timer {
 		}
 
 		await this.plugin.loadSettings(); //why am I loading settings on quit? to ensure that when I restart everything is correct? seems weird
+	}
+
+	 gatherPostPomoTaskItems() {
+		this.populateLineItems(this.activeLeaf, this.postPomoTaskItems);
+		this.postPomoTaskItems.forEach((value, index, array) => {
+			if (!this.initialPomoTaskItems.some(initialvalue => {
+				return (value.lineContent === initialvalue.lineContent && value.isCompleted === initialvalue.isCompleted);
+			})) {
+				this.modifiedPomoTaskItems.push(value);
+			}
+		});
 	}
 
 	pauseTimer(): void {
@@ -196,8 +221,11 @@ export class Timer {
 		this.paused = false;
 		if (this.settings.logActiveNote === true) {
 			const activeView = this.plugin.app.workspace.getActiveFile();
+			const activeLeaf = this.plugin.app.workspace.activeLeaf;
+			this.populateLineItems(activeLeaf, this.initialPomoTaskItems);
 			if (activeView) {
 				this.activeNote = activeView;
+				this.activeLeaf = activeLeaf;
 			}
 		}
 		if(this.settings.betterIndicator === true) {
@@ -219,6 +247,25 @@ export class Timer {
 		if (this.settings.whiteNoise === true) {
 			this.whiteNoisePlayer.whiteNoise();
 		}
+	}
+
+	private populateLineItems(activeLeaf: WorkspaceLeaf, pomoTaskItems: Array<PomoTaskItem>) {
+		activeLeaf.view.containerEl.findAll("span[role='presentation']").forEach(((value, index) => {
+			if (value.innerText.contains('[ ]') || value.innerText.contains('[x]') || value.innerText.contains('[X]')) {
+				let pomoItem = new PomoTaskItem(this.cleanString(value.innerText), value.innerText.contains('[ ]') ? false : true, index, 3);
+				pomoTaskItems.push(pomoItem);
+			}
+		}));
+
+		activeLeaf.view.containerEl.findAll("input[type='checkbox']").forEach(((value, index) => {
+			let htmlInput: HTMLInputElement = null;
+			if(value instanceof HTMLInputElement) {
+				htmlInput = value as HTMLInputElement;
+			}
+			let isCompleted: boolean = htmlInput.checked;
+			let pomoItem = new PomoTaskItem(this.cleanString(htmlInput.nextSibling.textContent), isCompleted, index, 3);
+			pomoTaskItems.push(pomoItem);
+		}))
 	}
 
 	setStartAndEndTime(millisecsLeft: number): void {
@@ -308,7 +355,34 @@ export class Timer {
 		if (this.settings.logActiveNote === true) { //append link to note that was active when pomo started
 			logText = logText + " " + this.plugin.app.fileManager.generateMarkdownLink(this.activeNote, '');
 			if(this.settings.logPomodoroDuration === true) {
-				logText = logText + ' ' + Math.floor(moment.duration(moment().diff(this.originalStartTime)).asMinutes()) + ' minute/s. ';
+				logText = "- " + logText + ' ' + Math.floor(moment.duration(moment().diff(this.originalStartTime)).asMinutes()) + ' minute/s. ';
+				// log completed items.
+				let hasCompleted = this.modifiedPomoTaskItems.some((value) => {
+					return value.isCompleted;
+				})
+				if(hasCompleted) {
+					logText = logText + '\n' + '\t- Completed Items :';
+					this.modifiedPomoTaskItems.forEach((value, index) => {
+						if(value.isCompleted) {
+							let inputString = this.cleanString(value.lineContent);
+							logText = logText + "\n" +"\t\t- " + inputString;
+						}
+					});
+				}
+				let hasNew = this.modifiedPomoTaskItems.some((value) => {
+					return !value.isCompleted;
+				});
+				// log new items.
+				if(hasNew) {
+					logText = logText + '\n' + '\t- New/UnTicked Items :';
+					this.modifiedPomoTaskItems.forEach(value => {
+						if(!value.isCompleted) {
+							let inputString = this.cleanString(value.lineContent);
+							logText = logText + "\n" + "\t\t- " + inputString;
+						}
+					})
+				}
+
 			}
 		}
 
@@ -327,7 +401,12 @@ export class Timer {
 		}
 	}
 
-	//from Note Refactor plugin by James Lynch, https://github.com/lynchjames/note-refactor-obsidian/blob/80c1a23a1352b5d22c70f1b1d915b4e0a1b2b33f/src/obsidian-file.ts#L69
+	private cleanString(lineItem: string) : string {
+		let inputString = lineItem.replace("- [ ]", "").replace("- [x]", "").replace("- [X]", "");
+		return  inputString.trim();
+	}
+
+//from Note Refactor plugin by James Lynch, https://github.com/lynchjames/note-refactor-obsidian/blob/80c1a23a1352b5d22c70f1b1d915b4e0a1b2b33f/src/obsidian-file.ts#L69
 	async appendFile(filePath: string, note: string): Promise<void> {
 		let existingContent = await this.plugin.app.vault.adapter.read(filePath);
 		if (existingContent.length > 0) {

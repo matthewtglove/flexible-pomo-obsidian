@@ -60,6 +60,7 @@ export default class PomoTimerPlugin extends Plugin {
 					if (!checking) {
 						this.timer.extendPomodoroTime = false;
 						this.timer.triggered = false;
+						this.timer.gatherPostPomoTaskItems();
 						this.timer.stopTimerEarly();
 						this.timer.quitTimer();
 					}
@@ -132,6 +133,7 @@ export default class PomoTimerPlugin extends Plugin {
 			checkCallback: (checking: boolean) => {
 				if (this.timer.mode !== Mode.NoTimer) {
 					if (!checking) {
+						this.timer.gatherPostPomoTaskItems();
 						this.timer.quitTimer();
 					}
 					return true;
