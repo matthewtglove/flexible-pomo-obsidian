@@ -87,14 +87,16 @@ Added a visual indicator based on https://github.com/third774/react-stopwatch
 ### Log Pomodoro Tasks
 
 Added tracking of Pomodoro Tasks. These are the checkboxes inside. It will track all of the tasks that were ticked 
-during a Pomodoro Session of the current Active Note.
+during a Pomodoro Session of the current Active Note. Tasks will only be tracked in the Active Note and it will only be tracked
+when the Pomodoro is in active note. Tracking will not work during breaks.
 
 Note: There is a current limitation that tracking is only based on text of files. Duplicates might not be tracked properly.
 
-![](logpomodorotasks2.png)
+![](loggingtaskvideo.GIF)
 
-![](logpomodorotasks.png)
+Please be sure to enable in settings.
 
+![](loggingtasksetting.png)
 
 
 ### Additional Commands
