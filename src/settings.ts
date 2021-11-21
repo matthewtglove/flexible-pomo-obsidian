@@ -20,6 +20,7 @@ export interface PomoSettings {
 	logToDaily: boolean;
 	logActiveNote: boolean;
 	logPomodoroDuration: boolean;
+	logPomodoroTasks: boolean;
 	fancyStatusBar: boolean;
 	whiteNoise: boolean;
 	showActiveNoteInTimer: boolean;
@@ -43,6 +44,7 @@ export const DEFAULT_SETTINGS: PomoSettings = {
 	logText: "[🍅] dddd, MMMM DD YYYY, h:mm A",
 	logActiveNote: false,
 	logPomodoroDuration: false,
+	logPomodoroTasks: false,
 	fancyStatusBar: false,
 	whiteNoise: false,
 	showActiveNoteInTimer: false,
@@ -253,6 +255,16 @@ export class PomoSettingTab extends PluginSettingTab {
 					.setValue(this.plugin.settings.logPomodoroDuration)
 					.onChange(value => {
 						this.plugin.settings.logPomodoroDuration = value;
+						this.plugin.saveSettings();
+					}));
+
+			new Setting(containerEl)
+				.setName("Log completed tasks of Active Note")
+				.setDesc("Log completed tasks of Active Note.")
+				.addToggle(toggle => toggle
+					.setValue(this.plugin.settings.logPomodoroTasks)
+					.onChange(value => {
+						this.plugin.settings.logPomodoroTasks = value;
 						this.plugin.saveSettings();
 					}));
 
