@@ -1,6 +1,6 @@
 {
   "name": "obsidian-flexible-pomo",
-  "version": "0.2.3",
+  "version": "0.2.3.1",
   "description": "Flexible Pomodoro Timers",
   "main": "main.js",
   "scripts": {

@@ -9,6 +9,13 @@ Click the clock icon in the left ribbon panel to start. Click again to toggle pa
 
 All of these actions are available from the command pallete. You can also set a hotkey to quit the timer.
 
+## Roadmap
+
+- [ ] Add summary logging for pomodoros
+- [ ] Add better task tracking for pomodoros.
+  - [ ] Include completed tasks for active note and daily note for logs.
+
+
 ## Settings
 
 You can change the duration of the pomodoro timer, breaks, and interval between long breaks, and toggle the end of timer sound and white noise.
