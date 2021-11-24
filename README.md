@@ -9,6 +9,22 @@ Click the clock icon in the left ribbon panel to start. Click again to toggle pa
 
 All of these actions are available from the command pallete. You can also set a hotkey to quit the timer.
 
+## Typical Workflow
+
+The typical workflow in Flexible Pomodoro is to use **Log And Quit** and **Workbench**. Of course, you can still use the regular Pomodoro using the 25 minute intervals. Having this option has made it more easily to move from one task to another without being bound by the 25 minutes. 
+
+Use **Log And Quit** when you want to finish your Pomodoro early or if you have extended your Pomodoro and wanted to finish.
+
+Use the **Workbench** to track multiple files and the checkboxes/tasks that you create in them. **Start A Pomodoro** first to use the workbench. Use **Link Active File To Workbench** to add files other than the originally started one into the workbench. When you use **Log And Quit**, all the details will be logged into your daily note or Pomodoro Log.
+
+After log and quit, please view your **Daily Note** or **Pomodoro Log** to get details of all the things that you did.
+
+![](samplellog.png)
+
+Use keyboard shortcuts to make everything easier.
+
+![](keyboardshortcuts2.png)
+
 ## Roadmap
 
 - [ ] Add summary logging for pomodoro
@@ -19,8 +35,12 @@ All of these actions are available from the command pallete. You can also set a 
   - [X] Include completed tasks/new tasks for Active Note.
 - [ ] Pomo Workbench
   - [X] Track multiple files during a pomodoro period.
-  - [ ] Add active file indicator in right taskbar.
+  - [ ] Add preview current workbench contents.
+  - [ ] Add active file indicator in pomo workbench leaf.
   - [ ] Add automatic Linking Mode.
+  - [ ] Option to have a persistent workbench
+  - [ ] Option to save workbench types.
+  - [ ] Option to include Daily Note in WorkBench/logging.
 
 
 ## Settings
@@ -100,15 +120,14 @@ Note: There is a current limitation that tracking is only based on text of files
 
 Please be sure to enable in settings.
 
+![](loggingtasksetting.png)
+
 ### Pomo WorkBench
 
 The workbench is a feature that you can use to have multiple files tracked during a Pomodoro period.
 This will enable the user to log tasks added and completed with these multiple files.
 
 ![](pomoworkbench.GIF)
-
-![](loggingtasksetting.png)
-
 
 ### Additional Commands
 
