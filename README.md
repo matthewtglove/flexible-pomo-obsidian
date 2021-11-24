@@ -21,6 +21,10 @@ After log and quit, please view your **Daily Note** or **Pomodoro Log** to get d
 
 ![](samplellog.png)
 
+Workbenches will help you track your current state of mind.
+
+![](workbench3.png)
+
 Use keyboard shortcuts to make everything easier.
 
 ![](keyboardshortcuts2.png)
