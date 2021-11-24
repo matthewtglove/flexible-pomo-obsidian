@@ -17,12 +17,11 @@ The typical workflow in Flexible Pomodoro is to **Start** your Pomodoro.
 
 Do your work and at the end of the 25 minute period, you will be asked if you want to extend or not.
 
-use **Log And Quit** and **Workbench**. Having this option has made it more easily to move from one task to another 
-without being bound by the 25 minutes, thus making it **Flexible**. You can also extend beyond the 25 minute interval
-if you choose Yes.
-
 ![](extendpomo.GIF)
 
+Use **Log And Quit** and **Workbench**. Having this option has made it more easily to move from one task to another 
+without being bound by the 25 minutes, thus making it **Flexible**. You can also extend beyond the 25 minute interval
+if you choose Yes.
 
 Use **Log And Quit** when you want to finish your Pomodoro early or if you have extended your Pomodoro and wanted to finish.
 
