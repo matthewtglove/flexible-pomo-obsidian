@@ -17,6 +17,10 @@ All of these actions are available from the command pallete. You can also set a 
   - [ ] Add rest time to logging.
 - [X] Add better task tracking for pomodoros.
   - [X] Include completed tasks/new tasks for Active Note.
+- [ ] Pomo Workbench
+  - [X] Track multiple files during a pomodoro period.
+  - [ ] Add active file indicator in right taskbar.
+  - [ ] Add automatic Linking Mode.
 
 
 ## Settings
@@ -96,6 +100,13 @@ Note: There is a current limitation that tracking is only based on text of files
 
 Please be sure to enable in settings.
 
+### Pomo WorkBench
+
+The workbench is a feature that you can use to have multiple files tracked during a Pomodoro period.
+This will enable the user to log tasks added and completed with these multiple files.
+
+![](pomoworkbench.GIF)
+
 ![](loggingtasksetting.png)
 
 
@@ -116,3 +127,16 @@ Starts a long break manually.
 Reveals the active Pomdoro note to the right pane.
 
 ![img_4.png](img_4.png)
+
+#### Link Active File To Workbench
+
+Adds a File to the current pomodoro workbench.
+
+#### Unlink Active File From Workbench
+
+Removes  a file from the current pomo workbench.
+
+#### Show Pomo WorkBench
+
+Reveals the pomo workbench in the right leaf.
+
