@@ -19,7 +19,7 @@ Do your work and at the end of the 25 minute period, you will be asked if you wa
 
 ![](extendpomo.GIF)
 
-If you choose Yes, your pomodoro will extend a stopwatch will appear instaed of a countdown timer. If you choose No, a Break timer will start. If you choose **Not For This Session**, the normal pomodoro cycle timers will kick in.
+If you choose **Yes**, your pomodoro will extend a stopwatch will appear instead of a countdown timer. If you choose **No**, a Break timer will start. If you choose **Not For This Session**, the normal pomodoro cycle timers will kick in.
 
 Use **Log And Quit** and **Workbench**. Having this option has made it more easily to move from one task to another 
 without being bound by the 25 minutes, thus making it **Flexible**. You can also extend beyond the 25 minute interval
