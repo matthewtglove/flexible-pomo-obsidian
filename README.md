@@ -11,7 +11,18 @@ All of these actions are available from the command pallete. You can also set a 
 
 ## Typical Workflow
 
-The typical workflow in Flexible Pomodoro is to use **Log And Quit** and **Workbench**. Of course, you can still use the regular Pomodoro using the 25 minute intervals. Having this option has made it more easily to move from one task to another without being bound by the 25 minutes. 
+The typical workflow in Flexible Pomodoro is to **Start** your Pomodoro.
+
+![](startpomo.GIF)
+
+Do your work and at the end of the 25 minute period, you will be asked if you want to extend or not.
+
+use **Log And Quit** and **Workbench**. Having this option has made it more easily to move from one task to another 
+without being bound by the 25 minutes, thus making it **Flexible**. You can also extend beyond the 25 minute interval
+if you choose Yes.
+
+![](extendpomo.GIF)
+
 
 Use **Log And Quit** when you want to finish your Pomodoro early or if you have extended your Pomodoro and wanted to finish.
 
