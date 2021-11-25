@@ -3,7 +3,7 @@ import * as feather from 'feather-icons'; //import just icons I want?
 import { PomoSettingTab, PomoSettings, DEFAULT_SETTINGS } from './settings';
 import { getDailyNoteFile, Mode, Timer } from './timer';
 import FlexiblePomoWorkbench from "./workbench";
-import {DEFAULT_DATA, WorkbenchItemsListViewType} from "./workbench_data";
+import {DEFAULT_DATA, FilePath, WorkbenchItemsListViewType} from "./workbench_data";
 import {ParseUtility} from "./parse_utility";
 import {WorkItem} from "./workitem";
 import {WorkbenchItemsListView} from "./workbench_view";
@@ -104,7 +104,7 @@ export default class PomoTimerPlugin extends Plugin {
 			name: 'Open Active Note',
 			icon: 'feather-open-active-note',
 			checkCallback: (checking: boolean) => {
-				if (this.timer.workItem.activeNote && this.timer.mode === Mode.Pomo) {
+				if (this.timer.workItem && this.timer.workItem.activeNote && this.timer.mode === Mode.Pomo) {
 					if (!checking) {
 						let view = this.app.workspace.getActiveViewOfType(MarkdownView)
 						if ( view ) {
@@ -175,7 +175,7 @@ export default class PomoTimerPlugin extends Plugin {
 			name: 'Link File To Active WorkBench',
 			icon: 'feather-add',
 			checkCallback: (checking: boolean) => {
-				if (this.timer.mode !== Mode.NoTimer && (this.timer.workItem.activeNote && this.app.workspace.getActiveFile() && (this.timer.workItem.activeNote.path !== this.app.workspace.getActiveFile().path))) {
+				if (this.timer.mode !== Mode.NoTimer && (this.timer.workItem && this.timer.workItem.activeNote && this.app.workspace.getActiveFile() && (this.timer.workItem.activeNote.path !== this.app.workspace.getActiveFile().path))) {
 					if(this.checkIfActive()) {
 						return false;
 					}
@@ -195,7 +195,7 @@ export default class PomoTimerPlugin extends Plugin {
 			name: 'Unlink File From Active Workbench',
 			icon: 'feather-remove',
 			checkCallback: (checking: boolean) => {
-				if (this.timer.mode !== Mode.NoTimer && (this.timer.workItem.activeNote && this.app.workspace.getActiveFile() && (this.timer.workItem.activeNote.path !== this.app.workspace.getActiveFile().path))) {
+				if (this.timer.mode !== Mode.NoTimer && (this.timer.workItem && this.timer.workItem.activeNote && this.app.workspace.getActiveFile() && (this.timer.workItem.activeNote.path !== this.app.workspace.getActiveFile().path))) {
 					if(!this.checkIfActive()) {
 						return false;
 					}
@@ -218,7 +218,6 @@ export default class PomoTimerPlugin extends Plugin {
 			}
 		});
 
-
 		this.addCommand({
 			id: 'show-pomoworkbench',
 			name: 'Show Pomo Workbench',
@@ -231,6 +230,15 @@ export default class PomoTimerPlugin extends Plugin {
 					return true;
 				}
 				return false;
+			}
+		});
+
+		this.addCommand({
+			id: 'clear-pomoworkbench',
+			name: 'Clear Pomo Workbench',
+			icon: 'feather-clear',
+			callback: () => {
+				this.pomoWorkBench.clearWorkBench();
 			}
 		});
 
@@ -251,7 +259,6 @@ export default class PomoTimerPlugin extends Plugin {
 
 		this.parseUtility = new ParseUtility(this);
 	}
-
 
 	private  async showWorkbench() {
 		if (this.app.workspace.getLeavesOfType(WorkbenchItemsListViewType).length) {

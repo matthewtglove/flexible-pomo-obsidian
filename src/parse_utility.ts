@@ -1,6 +1,7 @@
 import {PomoTaskItem} from "./pomo_task_item";
 import PomoTimerPlugin from "./main";
 import {WorkItem} from "./workitem";
+import {TFile} from "obsidian";
 
 export class ParseUtility {
 
@@ -31,21 +32,28 @@ export class ParseUtility {
         });
     }
 
-
-    async gatherLineItems(newWorkItem: WorkItem, pomoTaskItems: Array<PomoTaskItem>, isStore: boolean) {
+    async gatherLineItems(newWorkItem: WorkItem, pomoTaskItems: Array<PomoTaskItem>, isStore: boolean, activeFile:TFile) {
         let activeFileContent: string;
-        await this.plugin.app.vault.read(this.plugin.app.workspace.getActiveFile()).then(value => {
-            activeFileContent = value;
+        await this.plugin.app.vault.read(activeFile).then(value => {
+                activeFileContent = value;
         });
+
+        this.processActiveFileContents(activeFileContent, pomoTaskItems, isStore, newWorkItem);
+    }
+
+    private processActiveFileContents(activeFileContent: string, pomoTaskItems: Array<PomoTaskItem>, isStore: boolean, newWorkItem: WorkItem) {
         activeFileContent.split("\n").forEach((value, index) => {
             if (value.trim().startsWith('- [ ]')) {
-                pomoTaskItems.push( new PomoTaskItem(value.replace('- [ ]', ""), false));
+                pomoTaskItems.push(new PomoTaskItem(value.replace('- [ ]', ""), false));
             } else if (value.trim().startsWith('- [x]') || value.trim().startsWith('- [X]')) {
                 pomoTaskItems.push(new PomoTaskItem(value.replace('- [x]', '').replace('- [X]', ''), true));
             }
         })
-        if(isStore) {
-            this.plugin.pomoWorkBench.workItems.push(newWorkItem);
+        if (isStore) {
+            this.plugin.pomoWorkBench.addWorkbenchItem(newWorkItem);
         }
     }
+
+
+
 }

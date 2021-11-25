@@ -26,6 +26,7 @@ export interface PomoSettings {
 	showActiveNoteInTimer: boolean;
 	allowExtendedPomodoro: boolean;
 	betterIndicator: boolean;
+	persistentWorkbench: boolean;
 }
 
 export const DEFAULT_SETTINGS: PomoSettings = {
@@ -50,6 +51,7 @@ export const DEFAULT_SETTINGS: PomoSettings = {
 	showActiveNoteInTimer: false,
 	allowExtendedPomodoro: false,
 	betterIndicator: false,
+	persistentWorkbench: true,
 }
 
 
@@ -64,7 +66,7 @@ export class PomoSettingTab extends PluginSettingTab {
 	display(): void {
 		let { containerEl } = this;
 		containerEl.empty();
-		containerEl.createEl('h2', { text: 'Status Bar Pomodoro Timer - Settings' });
+		containerEl.createEl('h2', { text: 'Flexible Pomodoro Timer - Settings' });
 
 	
 		/**************  Timer settings **************/
@@ -177,6 +179,16 @@ export class PomoSettingTab extends PluginSettingTab {
 						this.display();
 					}));
 
+		new Setting(containerEl)
+			.setName("Persistent Workbench")
+			.setDesc("Option to retain workbench after Pomodoro ends.")
+			.addToggle(toggle => toggle
+				.setValue(this.plugin.settings.persistentWorkbench)
+				.onChange(value => {
+					this.plugin.settings.persistentWorkbench = value;
+					this.plugin.saveSettings();
+					this.display();
+				}));
 
 		/**************  Logging settings **************/
 
