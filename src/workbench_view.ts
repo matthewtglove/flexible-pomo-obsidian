@@ -3,8 +3,7 @@ import {ItemView, Menu, Notice, TFile, WorkspaceLeaf,} from 'obsidian';
 import PomoTimerPlugin from "./main";
 import {FilePath, WorkbenchFilesData, WorkbenchItemsListViewType} from "./workbench_data";
 import FlexiblePomoWorkbench from "./workbench";
-import {Mode} from "./timer";
-
+import {printReceivedArrayContainExpectedItem} from "expect/build/print";
 
 export class WorkbenchItemsListView extends ItemView {
     private readonly plugin: PomoTimerPlugin;
@@ -55,36 +54,31 @@ export class WorkbenchItemsListView extends ItemView {
     }
 
     public readonly redraw = (): void => {
-        const openFile = this.app.workspace.getActiveFile();
+        let activeFile:TFile;
+        if(this.plugin.timer.workItem) {
+            activeFile = this.plugin.timer.workItem.activeNote;
+        }
         const rootEl = createDiv({ cls: 'nav-folder mod-root' });
         const childrenEl = rootEl.createDiv({ cls: 'nav-folder-children' });
-        const activeNavFile = childrenEl.createDiv({ cls: 'nav-file' });
-        const activeNavFileTitle = activeNavFile.createDiv({ cls: 'nav-file-title' });
-        if(this.plugin.timer.workItem.activeNote && this.plugin.timer.mode === Mode.Pomo) {
-            activeNavFileTitle.createDiv({
-                cls: 'nav-file-title-content',
-                text: '*** ' + this.plugin.timer.workItem.activeNote.basename + ' ***',
-            });
-            this.addAttributesToNavFile(activeNavFile, this.plugin.timer.workItem.activeNote as FilePath, rootEl);
-        }
         if(this.data) {
             this.data.workbenchFiles.forEach((currentFile) => {
                 const navFile = childrenEl.createDiv({ cls: 'nav-file' });
                 const navFileTitle = navFile.createDiv({ cls: 'nav-file-title' });
-                /*
-                if (openFile && currentFile.path === openFile.path) {
-                    navFileTitle.addClass('is-active');
+                if(activeFile && activeFile.path === currentFile.path) {
+                    navFileTitle.createDiv({
+                        cls: 'nav-file-title-content',
+                        text: '*** ' + currentFile.basename + ' ***',
+                    });
+                } else {
+                    navFileTitle.createDiv({
+                        cls: 'nav-file-title-content',
+                        text: currentFile.basename,
+                    });
                 }
-                */
-                navFileTitle.createDiv({
-                    cls: 'nav-file-title-content',
-                    text: currentFile.basename,
-                });
+
                 this.addAttributesToNavFile(navFile, currentFile, rootEl);
             });
         }
-
-
         const contentEl = this.containerEl.children[1];
         contentEl.empty();
         contentEl.appendChild(rootEl);
@@ -132,25 +126,48 @@ export class WorkbenchItemsListView extends ItemView {
         });
     }
 
-    private readonly updateData = async (file: TFile): Promise<void> => {
+    private readonly updateData = async (file: TFile, isActiveNote: boolean): Promise<void> => {
         if(this.data) {
             this.data.workbenchFiles = this.data.workbenchFiles.filter(
                 (currFile) => currFile.path !== file.path,
             );
-            this.data.workbenchFiles.unshift({
-                basename: file.basename,
-                path: file.path,
-            });
+            if(isActiveNote) {
+                this.data.workbenchFiles.unshift({
+                    basename: file.basename,
+                    path: file.path,
+                });
+            } else {
+                this.data.workbenchFiles.push({
+                    basename: file.basename,
+                    path: file.path,
+                });
+            }
         }
-
         await this.workbench.pruneLength(); // Handles the save
     };
 
-    update = async (openedFile: TFile): Promise<void> => {
+    update = async (openedFile: TFile, isForceActiveNote: boolean): Promise<void> => {
+        let activeNoteInWorkBench:FilePath;
+        let isActiveNote:boolean = false;
+        if(!isForceActiveNote) {
+            for (const filePath of this.data.workbenchFiles) {
+                if (filePath.path === openedFile.path && this.plugin.timer.workItem && this.plugin.timer.workItem.activeNote.path === openedFile.path) {
+                    activeNoteInWorkBench = openedFile;
+                    isActiveNote = true;
+                    break;
+                }
+            }
+        } else {
+            isActiveNote = true;
+        }
+
+        if(activeNoteInWorkBench) {
+            this.data.workbenchFiles.remove(activeNoteInWorkBench);
+        }
         if (!openedFile || !this.workbench.shouldAddFile(openedFile)) {
             return;
         }
-        await this.updateData(openedFile);
+        await this.updateData(openedFile, isActiveNote);
         this.redraw();
     };
 

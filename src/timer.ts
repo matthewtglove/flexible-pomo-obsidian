@@ -54,9 +54,11 @@ export class Timer {
         this.allowExtendedPomodoroForSession = true;
         // initialize white noise player even if it it started as false so that it can be toggled.
         this.whiteNoisePlayer = new WhiteNoise(plugin, whiteNoiseUrl);
-        this.workItem = new WorkItem(this.plugin.app.workspace.getActiveFile());
+
 
     }
+
+
 
     onRibbonIconClick() {
         if (this.mode === Mode.NoTimer) {  //if starting from not having a timer running/paused
@@ -73,7 +75,11 @@ export class Timer {
         if (this.mode !== Mode.NoTimer) {
             if (this.extendPomodoroTime === false) {
                 if (this.paused === true) {
-                    return this.workItem.activeNote && this.plugin.settings.logActiveNote && this.plugin.settings.showActiveNoteInTimer ? '( ' + this.workItem.activeNote.basename + ' ) ' + millisecsToString(this.pausedTime) : millisecsToString(this.pausedTime); //just show the paused time
+                    if(this.workItem) {
+                        return this.workItem.activeNote && this.plugin.settings.logActiveNote && this.plugin.settings.showActiveNoteInTimer ? '( ' + this.workItem.activeNote.basename + ' ) ' + millisecsToString(this.pausedTime) : millisecsToString(this.pausedTime); //just show the paused time
+                    } else {
+                        return millisecsToString(this.pausedTime); //just show the paused time
+                    }
                 }
                 /*if reaching the end of the current timer, end of current timer*/
                 else if (moment().isSameOrAfter(this.endTime)) {
@@ -83,12 +89,24 @@ export class Timer {
                         await this.handleTimerEnd();
                     }
                 }
-                return this.workItem.activeNote && this.plugin.settings.logActiveNote && this.plugin.settings.showActiveNoteInTimer ? '( ' + this.workItem.activeNote.basename + ' ) ' + millisecsToString(this.getCountdown()) : millisecsToString(this.getCountdown()); //return display value
+                if(this.workItem) {
+                    return this.workItem.activeNote && this.plugin.settings.logActiveNote && this.plugin.settings.showActiveNoteInTimer ? '( ' + this.workItem.activeNote.basename + ' ) ' + millisecsToString(this.getCountdown()) : millisecsToString(this.getCountdown()); //return display value
+                } else {
+                    return  millisecsToString(this.getCountdown()); //return display value
+                }
             } else {
                 if (this.paused === true) {
-                    return this.workItem.activeNote && this.plugin.settings.logActiveNote && this.plugin.settings.showActiveNoteInTimer ? '( ' + this.workItem.activeNote.basename + ' ) ' + millisecsToString(this.pausedTime) : millisecsToString(this.pausedTime); //just show the paused time
+                    if(this.workItem) {
+                        return this.workItem.activeNote && this.plugin.settings.logActiveNote && this.plugin.settings.showActiveNoteInTimer ? '( ' + this.workItem.activeNote.basename + ' ) ' + millisecsToString(this.pausedTime) : millisecsToString(this.pausedTime); //just show the paused time
+                    } else {
+                        return  millisecsToString(this.pausedTime); //just show the paused time
+                    }
                 }
-                return this.workItem.activeNote && this.plugin.settings.logActiveNote && this.plugin.settings.showActiveNoteInTimer ? '( ' + this.workItem.activeNote.basename + ' ) ' + millisecsToString(this.getStopwatch()) : millisecsToString(this.getStopwatch()); //return display value
+                if(this.workItem) {
+                    return this.workItem.activeNote && this.plugin.settings.logActiveNote && this.plugin.settings.showActiveNoteInTimer ? '( ' + this.workItem.activeNote.basename + ' ) ' + millisecsToString(this.getStopwatch()) : millisecsToString(this.getStopwatch()); //return display value
+                } else {
+                    return millisecsToString(this.getStopwatch()); //return display value
+                }
             }
 
         } else {
@@ -150,9 +168,11 @@ export class Timer {
     }
 
     private clearPomoTasks() {
-        this.workItem.initialPomoTaskItems = new Array<PomoTaskItem>();
-        this.workItem.postPomoTaskItems = new Array<PomoTaskItem>();
-        this.workItem.modifiedPomoTaskItems = new Array<PomoTaskItem>();
+        if(this.workItem) {
+            this.workItem.initialPomoTaskItems = new Array<PomoTaskItem>();
+            this.workItem.postPomoTaskItems = new Array<PomoTaskItem>();
+            this.workItem.modifiedPomoTaskItems = new Array<PomoTaskItem>();
+        }
     }
 
     private closeTimerIndicator() {
@@ -174,12 +194,21 @@ export class Timer {
         if (this.settings.whiteNoise === true) {
             this.whiteNoisePlayer.stopWhiteNoise();
         }
+        this.clearActiveNote();
         await this.plugin.pomoWorkBench.stopWorkbench();
         await this.plugin.loadSettings(); //w
         // hy am I loading settings on quit? to ensure that when I restart everything is correct? seems weird
     }
 
 
+    private clearActiveNote() {
+        if (this.plugin.timer && this.plugin.timer.workItem) {
+            this.plugin.timer.workItem = null;
+        }
+        if (this.plugin.pomoWorkBench && this.plugin.pomoWorkBench.view) {
+            this.plugin.pomoWorkBench.view.redraw();
+        }
+    }
 
     pauseTimer(): void {
         this.paused = true;
@@ -208,24 +237,50 @@ export class Timer {
         }
     }
 
-    startTimer(mode: Mode): void {
+     startTimer(mode: Mode) {
         this.mode = mode;
         this.paused = false;
+        this.workItem = new WorkItem(this.plugin.app.workspace.getActiveFile(), true);
         if (mode === Mode.Pomo) {
             if (this.settings.logActiveNote === true) {
                 const activeView = this.plugin.app.workspace.getActiveFile();
                 if (activeView) {
                     this.workItem.activeNote = activeView;
+                    if(this.plugin.pomoWorkBench.workItems.length) {
+                        for(const workItem of this.plugin.pomoWorkBench.workItems) {
+                            workItem.isStartedActiveNote = false;
+                        }
+                    }
+                    this.plugin.pomoWorkBench.addWorkbenchItem(this.workItem);
+                    // reinitialize workbench items initial pomo tasks.
+                    let oldItems = this.plugin.pomoWorkBench.workItems.map(value => {
+                        return value;
+                    })
+                    this.plugin.pomoWorkBench.workItems = new Array<WorkItem>();
+                    for(const oldItem of oldItems) {
+                        oldItem.postPomoTaskItems = new Array<PomoTaskItem>();
+                        oldItem.modifiedPomoTaskItems = new Array<PomoTaskItem>();
+                        oldItem.initialPomoTaskItems = new Array<PomoTaskItem>();
+                        this.plugin.parseUtility.gatherLineItems(oldItem,oldItem.initialPomoTaskItems, true, oldItem.activeNote);
+                    }
+                    if(!this.plugin.pomoWorkBench.view) {
+                        this.plugin.pomoWorkBench.initView();
+                    }
+                    // reset the work item active notes.
+                    this.plugin.pomoWorkBench.view.update(this.workItem.activeNote,true);
                 }
                 if (this.settings.logPomodoroTasks === true) {
                     //reset the pomo holders.
-                    this.clearPomoTasks();
-                    this.plugin.parseUtility.gatherLineItems(this.workItem, this.workItem.initialPomoTaskItems, false);
+                    if(this.workItem) {
+                        this.clearPomoTasks();
+                        this.plugin.parseUtility.gatherLineItems(this.workItem, this.workItem.initialPomoTaskItems, false, this.plugin.app.workspace.getActiveFile());
+                    }
                 }
             }
         } else {
             this.closeTimerIndicator();
             this.clearPomoTasks();
+            this.clearActiveNote();
         }
 
         if (this.settings.betterIndicator === true) {
@@ -344,7 +399,9 @@ export class Timer {
         logText = '- ' + await this.extractLog(this.workItem, logText, false);
 
         for(const workItem of this.plugin.pomoWorkBench.workItems) {
-            logText =   await this.extractLog(workItem, logText, true);
+            if(!workItem.isStartedActiveNote) {
+                logText =   await this.extractLog(workItem, logText, true);
+            }
         }
 
         if (this.settings.logToDaily === true) { //use today's note

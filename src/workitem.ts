@@ -6,11 +6,13 @@ export class WorkItem {
     initialPomoTaskItems : PomoTaskItem[];
     postPomoTaskItems:PomoTaskItem[];
     modifiedPomoTaskItems: PomoTaskItem[];
+    isStartedActiveNote: boolean;
 
-    constructor(activeNote: TFile) {
+    constructor(activeNote: TFile, isStartedActiveNote: boolean) {
         this.activeNote = activeNote;
         this.initialPomoTaskItems = new Array<PomoTaskItem>();
         this.postPomoTaskItems = new Array<PomoTaskItem>();
         this.modifiedPomoTaskItems = new Array<PomoTaskItem>();
+        this.isStartedActiveNote = isStartedActiveNote;
     }
 }
