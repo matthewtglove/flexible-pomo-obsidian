@@ -75,8 +75,9 @@ export default class PomoTimerPlugin extends Plugin {
 					if(!checking) {
 						this.timer = new Timer(this);
 						this.timer.triggered = false;
-						this.timer.startTimer(Mode.Pomo);
 						this.showWorkbench();
+						this.timer.startTimer(Mode.Pomo);
+
 					}
 					return true;
 				}

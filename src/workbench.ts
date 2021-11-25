@@ -105,7 +105,6 @@ export default class FlexiblePomoWorkbench {
             //await leaf.setViewState({type: 'empty'});
             break;
         }
-        this.plugin.app.workspace.getRightLeaf(false);
         (leaf ?? this.plugin.app.workspace.getRightLeaf(false)).setViewState({
             type: WorkbenchItemsListViewType,
             active: true,

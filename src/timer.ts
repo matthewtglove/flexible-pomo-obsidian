@@ -263,9 +263,11 @@ export class Timer {
                         oldItem.initialPomoTaskItems = new Array<PomoTaskItem>();
                         this.plugin.parseUtility.gatherLineItems(oldItem,oldItem.initialPomoTaskItems, true, oldItem.activeNote);
                     }
+                    /*
                     if(!this.plugin.pomoWorkBench.view) {
                         this.plugin.pomoWorkBench.initView();
                     }
+                    */
                     // reset the work item active notes.
                     this.plugin.pomoWorkBench.view.update(this.workItem.activeNote,true);
                 }
