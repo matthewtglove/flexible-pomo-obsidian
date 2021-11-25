@@ -1,6 +1,4 @@
 import {
-    addIcon,
-    TAbstractFile,
     TFile,
     WorkspaceLeaf,
 } from 'obsidian';
@@ -10,9 +8,6 @@ import {DEFAULT_DATA, defaultMaxLength, FilePath, WorkbenchItemsListViewType, Wo
 import {WorkItem} from "./workitem";
 import {PomoTaskItem} from "./pomo_task_item";
 import {Mode} from "./timer";
-
-
-
 
 export default class FlexiblePomoWorkbench {
     public data: WorkbenchFilesData;
@@ -30,12 +25,6 @@ export default class FlexiblePomoWorkbench {
         this.plugin = plugin;
         this.data = data;
         this.workItems = new Array<WorkItem>();
-        this.loadPlugin()
-    }
-
-    public  loadPlugin() {
-
-        //this.addSettingTab(new RecentFilesSettingTab(this.app, this));
     }
 
     public async unlinkItem(workItem: WorkItem) {
@@ -52,7 +41,6 @@ export default class FlexiblePomoWorkbench {
         }
         await this.view.redraw();
     }
-
 
     public readonly pruneOmittedFiles = async (): Promise<void> => {
         this.data.workbenchFiles = this.data.workbenchFiles.filter(this.shouldAddFile);

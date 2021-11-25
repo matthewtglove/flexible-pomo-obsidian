@@ -55,10 +55,6 @@ export default class PomoTimerPlugin extends Plugin {
 		} else {
 			this.registerEvent(this.app.workspace.on('quit', this.pomoWorkBench.initView));
 		}
-		//this.registerEvent(this.app.vault.on('rename', this.handleRename));
-		//this.registerEvent(this.app.vault.on('delete', this.handleDelete));
-
-
 		/*Update status bar timer ever half second
 		  Ideally should change so only updating when in timer mode
 		  - regular conditional doesn't remove after quit, need unload*/
@@ -74,11 +70,17 @@ export default class PomoTimerPlugin extends Plugin {
 			id: 'start-flexible-pomo',
 			name: 'Start Pomodoro',
 			icon: 'feather-play',
-			callback: () => {
-				this.timer = new Timer(this);
-				this.timer.triggered = false;
-				this.timer.startTimer(Mode.Pomo);
-				this.showWorkbench();
+			checkCallback: (checking:boolean) => {
+				if(this.timer.mode !== Mode.Pomo) {
+					if(!checking) {
+						this.timer = new Timer(this);
+						this.timer.triggered = false;
+						this.timer.startTimer(Mode.Pomo);
+						this.showWorkbench();
+					}
+					return true;
+				}
+				return false;
 			}
 		});
 
