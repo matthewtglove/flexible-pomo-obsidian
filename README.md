@@ -54,7 +54,8 @@ Use keyboard shortcuts to make everything easier.
   - [ ] Add preview current workbench contents.
   - [ ] Add active file indicator in pomo workbench leaf.
   - [ ] Add automatic Linking Mode.
-  - [ ] Option to have a persistent workbench
+  - [X] Option to have a persistent workbench
+  - [ ] Persistent work bench across restarts.
   - [ ] Option to save workbench types.
   - [ ] Option to include Daily Note in WorkBench/logging.
 
@@ -138,12 +139,21 @@ Please be sure to enable in settings.
 
 ![](loggingtasksetting.png)
 
-### Pomo WorkBench
+### Pomo Workbench
 
 The workbench is a feature that you can use to have multiple files tracked during a Pomodoro period.
 This will enable the user to log tasks added and completed with these multiple files.
 
 ![](pomoworkbench.GIF)
+
+### Persistent Workbench
+
+Allows pomodoro workbench to persist across Pomodoro sequences. Pomodoros will remain even after the Pomodoro timer has 
+ended. Workbench can be cleared using the **Clear Pomo Workbench** command.
+
+Note: Persistent workbench across Obsidian restarts is not yet implemented. 
+
+![](persistent_workbench.png)
 
 ### Additional Commands
 
@@ -174,4 +184,8 @@ Removes  a file from the current pomo workbench.
 #### Show Pomo WorkBench
 
 Reveals the pomo workbench in the right leaf.
+
+#### Clear Pomo WorkBench
+
+Clears the pomo workbench. Active note will not be removed if timer is active and not on a break.
 
