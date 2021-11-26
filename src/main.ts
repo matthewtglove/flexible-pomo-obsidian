@@ -228,15 +228,9 @@ export default class PomoTimerPlugin extends Plugin {
 			id: 'show-pomoworkbench',
 			name: 'Show Pomo Workbench',
 			icon: 'feather-show',
-			checkCallback: (checking: boolean) => {
-				if (this.timer.mode === Mode.Pomo) {
-					if (!checking) {
-						this.showWorkbench();
-					}
-					return true;
-				}
-				return false;
-			}
+			callback: () => {
+				this.showWorkbench();
+			},
 		});
 
 		this.addCommand({
