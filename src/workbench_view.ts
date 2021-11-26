@@ -3,7 +3,6 @@ import {ItemView, Menu, Notice, TFile, WorkspaceLeaf,} from 'obsidian';
 import PomoTimerPlugin from "./main";
 import {FilePath, WorkbenchFilesData, WorkbenchItemsListViewType} from "./workbench_data";
 import FlexiblePomoWorkbench from "./workbench";
-import {printReceivedArrayContainExpectedItem} from "expect/build/print";
 
 export class WorkbenchItemsListView extends ItemView {
     private readonly plugin: PomoTimerPlugin;

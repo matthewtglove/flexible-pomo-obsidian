@@ -19,6 +19,9 @@ export default class PomoTimerPlugin extends Plugin {
 	async onload() {
 		console.log('Loading status bar pomodoro timer');
 
+		// detach old leaves during the start. This make sure that you are always using the latest type.
+		this.app.workspace.detachLeavesOfType(WorkbenchItemsListViewType);
+
 		await this.loadSettings();
 		this.addSettingTab(new PomoSettingTab(this.app, this));
 		this.statusBar = this.addStatusBarItem();
