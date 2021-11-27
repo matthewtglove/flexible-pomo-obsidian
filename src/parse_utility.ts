@@ -13,6 +13,13 @@ export class ParseUtility {
 
     async gatherPostPomoTaskItems(workItem: WorkItem) {
         let activeFileContent: string;
+        // ensure that post pomotaskitems are not reused.
+        if(workItem.postPomoTaskItems.length) {
+            workItem.postPomoTaskItems = new Array<PomoTaskItem>();
+        }
+        if(workItem.modifiedPomoTaskItems.length) {
+            workItem.modifiedPomoTaskItems = new Array<PomoTaskItem>();
+        }
         await this.plugin.app.vault.read(workItem.activeNote).then(value => {
             activeFileContent = value;
         });

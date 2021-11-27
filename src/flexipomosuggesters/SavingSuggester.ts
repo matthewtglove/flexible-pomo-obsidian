@@ -67,7 +67,6 @@ export class SavingSuggester extends FuzzySuggestModal<TFile> {
      onChooseItem(item: TFile): void {
         switch (this.open_mode) {
             case OpenMode.InsertTemplate:
-                 debugger;
                  this.plugin.settings.active_workbench_path = item.path;
                  this.plugin.settings.active_workbench = item.basename;
                  this.plugin.saveSettings();

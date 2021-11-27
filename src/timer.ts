@@ -193,8 +193,9 @@ export class Timer {
         if(this.plugin.settings.active_workbench_path) {
             this.plugin.pomoWorkBench.modified = false;
             await this.plugin.fileUtility.handleAppend(this.plugin.app.vault.getAbstractFileByPath(this.plugin.settings.active_workbench_path) as TFile);
-            this.plugin.pomoWorkBench.view.redraw();
+
         }
+        this.plugin.pomoWorkBench.workItems = new Array<WorkItem>();
         await this.plugin.pomoWorkBench.view.redraw();
         //await this.plugin.loadSettings(); //w
         await this.plugin.saveSettings(); // save the setting to reflect the latest active workbench.
@@ -275,6 +276,8 @@ export class Timer {
                 this.plugin.pomoWorkBench.view.redraw();
                 this.plugin.fileUtility.handleAppend(this.plugin.app.vault.getAbstractFileByPath(this.settings.active_workbench_path) as TFile);
             }
+            //clear workbench items.
+            this.plugin.pomoWorkBench.workItems = new Array<WorkItem>();
             this.closeTimerIndicator();
             this.clearPomoTasks();
             this.clearActiveNote();

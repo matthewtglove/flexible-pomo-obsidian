@@ -267,10 +267,16 @@ export default class FlexiblePomoTimerPlugin extends Plugin {
 			id: 'show-current-progress',
 			name: 'Show Current Progress',
 			icon: 'feather-show',
-			callback: () => {
-				if(this.pomoWorkBench) {
-					this.pomoWorkBench.current_progress_modal.open();
+			checkCallback: (checking) => {
+				if(this.timer.mode === Mode.Pomo) {
+					if(!checking) {
+						if(this.pomoWorkBench) {
+							this.pomoWorkBench.current_progress_modal.open();
+						}
+					}
+					return true;
 				}
+				return false;
 			}
 		});
 
