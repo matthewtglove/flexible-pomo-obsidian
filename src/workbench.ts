@@ -164,4 +164,68 @@ export default class FlexiblePomoWorkbench {
         }
     }
 
+    shiftPositionDatafile(isMoveUp:boolean) {
+        let index: number = 0;
+        let hasMatch: boolean = false;
+        for (const workbenchFile of this.data.workbenchFiles) {
+            if (workbenchFile.path === this.plugin.app.workspace.getActiveFile().path) {
+                hasMatch = true;
+                break;
+            }
+            index++;
+        }
+        if(isMoveUp) {
+            if(hasMatch && (index - 1) >= 0) {
+                this.arrayMoveDatafile(this.data.workbenchFiles, index, index -1);
+                this.modified = true;
+                this.view.redraw();
+            }
+        } else {
+            if(hasMatch && (index) < this.data.workbenchFiles.length + 1) {
+                this.arrayMoveDatafile(this.data.workbenchFiles, index, index +1);
+                this.modified = true;
+                this.view.redraw();
+            }
+        }
+    }
+
+    shiftPositionWorkItem(isMoveUp:boolean) {
+        let index: number = 0;
+        let hasMatch: boolean = false;
+        for (const workItem of this.workItems) {
+            if (workItem.activeNote.path === this.plugin.app.workspace.getActiveFile().path) {
+                hasMatch = true;
+                break;
+            }
+            index++;
+        }
+        if (isMoveUp) {
+            if (hasMatch && (index - 1) >= 0) {
+                this.arrayMoveWorkItem(this.workItems, index, index - 1);
+                this.modified = true;
+                this.view.redraw();
+            }
+        } else {
+            if (hasMatch && (index) < this.workItems.length + 1) {
+                this.arrayMoveWorkItem(this.workItems, index, index + 1);
+                this.modified = true;
+                this.view.redraw();
+            }
+        }
+    }
+
+
+
+    arrayMoveDatafile(arr:Array<FilePath>, fromIndex:number, toIndex:number) {
+        let element = arr[fromIndex];
+        arr.splice(fromIndex, 1);
+        arr.splice(toIndex, 0, element);
+    }
+
+    arrayMoveWorkItem(arr:Array<WorkItem>, fromIndex:number, toIndex:number) {
+        let element = arr[fromIndex];
+        arr.splice(fromIndex, 1);
+        arr.splice(toIndex, 0, element);
+    }
+
 }

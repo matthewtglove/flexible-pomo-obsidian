@@ -3,7 +3,7 @@ import * as feather from 'feather-icons'; //import just icons I want?
 import {DEFAULT_SETTINGS, PomoSettings, PomoSettingTab} from './settings';
 import {getDailyNoteFile, Mode, Timer} from './timer';
 import FlexiblePomoWorkbench from "./workbench";
-import {DEFAULT_DATA, WorkbenchItemsListViewType} from "./workbench_data";
+import {DEFAULT_DATA, FilePath, WorkbenchItemsListViewType} from "./workbench_data";
 import {ParseUtility} from "./parse_utility";
 import {WorkItem} from "./workitem";
 import {WorkbenchItemsListView} from "./workbench_view";
@@ -345,6 +345,40 @@ export default class FlexiblePomoTimerPlugin extends Plugin {
 		});
 
 		this.addCommand({
+			id: "move-workbench-note-up",
+			name: "Move Workbench Note Up",
+			checkCallback: (checking) => {
+				if(this.checkIfActive()) {
+					if(!checking) {
+						this.pomoWorkBench.shiftPositionDatafile(true);
+						if(this.timer && this.timer.mode === Mode.Pomo) {
+							this.pomoWorkBench.shiftPositionWorkItem(true);
+						}
+					}
+					return true;
+				}
+				return false;
+			},
+		})
+
+		this.addCommand({
+			id: "move-workbench-note-down",
+			name: "Move Workbench Note Down",
+			checkCallback: (checking) => {
+				if(this.checkIfActive()) {
+					if(!checking) {
+						this.pomoWorkBench.shiftPositionDatafile(false);
+						if(this.timer && this.timer.mode === Mode.Pomo) {
+							this.pomoWorkBench.shiftPositionWorkItem(false);
+						}
+					}
+					return true;
+				}
+				return false;
+			},
+		})
+
+		this.addCommand({
 			id: "flexible-unload-workbench",
 			name: "Unload Pomo Workbench",
 			checkCallback: (checking) => {
@@ -374,6 +408,9 @@ export default class FlexiblePomoTimerPlugin extends Plugin {
 		this.parseUtility = new ParseUtility(this);
 		this.app.workspace.on("file-open", this.handleFileOpen);
 	}
+
+
+
 
 	handleFileOpen = async (tFile: TFile):Promise<void> => {
 		this.opened_file_path = tFile.path;

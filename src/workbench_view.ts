@@ -147,21 +147,19 @@ export class WorkbenchItemsListView extends ItemView {
     }
 
     private readonly updateData = async (file: TFile, isActiveNote: boolean): Promise<void> => {
-        if(this.data) {
+        if (this.data) {
+            for (const workbenchFile of this.data.workbenchFiles) {
+                if (workbenchFile.path === file.path) {
+                    return;
+                }
+            }
             this.data.workbenchFiles = this.data.workbenchFiles.filter(
                 (currFile) => currFile.path !== file.path,
             );
-            if(isActiveNote) {
-                this.data.workbenchFiles.unshift({
-                    basename: file.basename,
-                    path: file.path,
-                });
-            } else {
-                this.data.workbenchFiles.push({
-                    basename: file.basename,
-                    path: file.path,
-                });
-            }
+            this.data.workbenchFiles.push({
+                basename: file.basename,
+                path: file.path,
+            });
         }
         await this.workbench.pruneLength(); // Handles the save
     };
