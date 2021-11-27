@@ -80,6 +80,9 @@ export default class FlexiblePomoTimerPlugin extends Plugin {
 			name: 'Start Pomodoro',
 			icon: 'feather-play',
 			checkCallback: (checking:boolean) => {
+				if(this.settings.logActiveNote && !this.app.workspace.getActiveFile()) {
+					return false;
+				}
 				if(this.timer.mode !== Mode.Pomo) {
 					if(!checking) {
 						this.timer = new Timer(this);
@@ -386,6 +389,13 @@ export default class FlexiblePomoTimerPlugin extends Plugin {
 		this.registerEvent(this.app.vault.on('delete', this.handleDelete));
 		this.registerEvent(this.app.vault.on('rename', this.handleRename));
 	}
+
+	 handleClose = async () => {
+		 if(!this.app.workspace.getActiveFile()) {
+			 this.opened_file_path = '';
+		 }
+		 this.pomoWorkBench.view.redraw()
+	 }
 
 
 	private unlinkFile(tFile:TFile) {
