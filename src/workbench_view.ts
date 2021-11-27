@@ -60,7 +60,7 @@ export class WorkbenchItemsListView extends ItemView {
         const rootEl = createDiv({ cls: 'nav-folder mod-root' });
         const childrenEl = rootEl.createDiv({ cls: 'nav-folder-children' });
 
-        if(this.plugin.settings.active_workbench_path) {
+        if(this.plugin.settings.active_workbench_path && this.plugin.app.vault.getAbstractFileByPath(this.plugin.settings.active_workbench_path)) {
             let workbenchFile:TFile = (this.plugin.app.vault.getAbstractFileByPath(this.plugin.settings.active_workbench_path) as TFile)
             const navFile = childrenEl.createDiv({ cls: 'nav-file' });
             const navFileTitle = navFile.createDiv({ cls: 'nav-file-title' });

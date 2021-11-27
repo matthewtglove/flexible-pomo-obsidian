@@ -1,4 +1,4 @@
-import {addIcon, MarkdownView, Notice, Plugin, TFile} from 'obsidian';
+import {addIcon, MarkdownView, Notice, Plugin, TAbstractFile, TFile} from 'obsidian';
 import * as feather from 'feather-icons'; //import just icons I want?
 import {DEFAULT_SETTINGS, PomoSettings, PomoSettingTab} from './settings';
 import {getDailyNoteFile, Mode, Timer} from './timer';
@@ -215,29 +215,7 @@ export default class FlexiblePomoTimerPlugin extends Plugin {
 					return false;
 				}
 				if (!checking) {
-					let workItemToRemove: WorkItem;
-					if (this.timer.mode === Mode.Pomo) {
-						for (const currentItem of this.pomoWorkBench.workItems) {
-							if (currentItem.activeNote.path === this.app.workspace.getActiveFile().path) {
-								workItemToRemove = currentItem;
-								break;
-							}
-						}
-						if (workItemToRemove) {
-							this.pomoWorkBench.modified = true;
-							this.pomoWorkBench.unlinkItem(workItemToRemove);
-							new Notice('Unlinking Active Note From Workbench');
-						}
-					} else {
-						for (const dataFile of this.pomoWorkBench.data.workbenchFiles) {
-							if (dataFile.path === this.app.workspace.getActiveFile().path) {
-								this.pomoWorkBench.modified = true;
-								this.pomoWorkBench.data.workbenchFiles.remove(dataFile);
-								break;
-							}
-						}
-						this.pomoWorkBench.view.redraw();
-					}
+					this.unlinkFile(this.app.workspace.getActiveFile());
 				}
 				return true;
 			}
@@ -405,10 +383,53 @@ export default class FlexiblePomoTimerPlugin extends Plugin {
 		})
 		this.parseUtility = new ParseUtility(this);
 		this.app.workspace.on("file-open", this.handleFileOpen);
+		this.registerEvent(this.app.vault.on('delete', this.handleDelete));
+		this.registerEvent(this.app.vault.on('rename', this.handleRename));
 	}
 
 
+	private unlinkFile(tFile:TFile) {
+		let workItemToRemove: WorkItem;
+		if (this.timer.mode === Mode.Pomo) {
+			for (const currentItem of this.pomoWorkBench.workItems) {
+				if (currentItem.activeNote.path === tFile.path) {
+					workItemToRemove = currentItem;
+					break;
+				}
+			}
+			if (workItemToRemove) {
+				this.pomoWorkBench.modified = true;
+				this.pomoWorkBench.unlinkItem(workItemToRemove);
+				new Notice('Unlinking Active Note From Workbench');
+			}
+		} else {
+			for (const dataFile of this.pomoWorkBench.data.workbenchFiles) {
+				if (dataFile.path === tFile.path) {
+					this.pomoWorkBench.modified = true;
+					this.pomoWorkBench.data.workbenchFiles.remove(dataFile);
+					break;
+				}
+			}
+			this.pomoWorkBench.view.redraw();
+		}
+	}
 
+	private readonly handleDelete = async (
+		file: TAbstractFile,
+	): Promise<void> => {
+		this.unlinkFile(file as TFile);
+	};
+
+
+	private readonly handleRename = async (
+		file: TAbstractFile,
+		oldPath: string,
+	): Promise<void> => {
+		this.pomoWorkBench.modified = true;
+		debugger;
+		this.pomoWorkBench.linkFile(file as TFile, null);
+		this.showWorkbench();
+	};
 
 	handleFileOpen = async (tFile: TFile):Promise<void> => {
 		this.opened_file_path = tFile.path;
