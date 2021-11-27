@@ -264,6 +264,17 @@ export default class FlexiblePomoTimerPlugin extends Plugin {
 		});
 
 		this.addCommand({
+			id: 'show-current-progress',
+			name: 'Show Current Progress',
+			icon: 'feather-show',
+			callback: () => {
+				if(this.pomoWorkBench) {
+					this.pomoWorkBench.current_progress_modal.open();
+				}
+			}
+		});
+
+		this.addCommand({
 			id: 'toggle-flexible-pomo-white-noise',
 			name: 'Toggle White noise',
 			icon: 'feather-headphones',
@@ -284,7 +295,7 @@ export default class FlexiblePomoTimerPlugin extends Plugin {
 			callback: () => {
 				this.pomoWorkBench.modified = false;
 				this.saving_suggester.insert_template();
-				this.saveSettings();
+
 			},
 		});
 

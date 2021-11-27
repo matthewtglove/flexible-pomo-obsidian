@@ -53,8 +53,7 @@ export class FileUtility {
             new Notice("The file is not existing yet.");
             return;
         } else {
-            this.plugin.settings.active_workbench = targetFile.basename;
-            this.plugin.settings.active_workbench_path = targetFile.path;
+            this.saveWorkBenchSettings(targetFile);
             this.plugin.pomoWorkBench.view.redraw();
             let text:string = "";
             text = text + "### " + moment().format('MM/DD/YYYY HH:mm:ss').toString() + "\n\n";
@@ -81,8 +80,7 @@ export class FileUtility {
             new Notice("This file already exists.");
             return;
         } else {
-            this.plugin.settings.active_workbench = file.basename;
-            this.plugin.settings.active_workbench_path = file.path;
+            this.saveWorkBenchSettings(file);
             this.plugin.pomoWorkBench.view.redraw();
             let text:string = "";
 
@@ -100,5 +98,11 @@ export class FileUtility {
             text = text + "\n\n";
             this.plugin.app.vault.append(file,text);
         }
+    }
+
+    private saveWorkBenchSettings(file: TFile) {
+        this.plugin.settings.active_workbench = file.basename;
+        this.plugin.settings.active_workbench_path = file.path;
+        this.plugin.saveSettings();
     }
 }

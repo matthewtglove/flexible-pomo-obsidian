@@ -8,6 +8,7 @@ import {DEFAULT_DATA, defaultMaxLength, FilePath, WorkbenchItemsListViewType, Wo
 import {WorkItem} from "./workitem";
 import {PomoTaskItem} from "./pomo_task_item";
 import {Mode} from "./timer";
+import {CurrentProgressModal} from "./current_progress_modal";
 
 export default class FlexiblePomoWorkbench {
     public data: WorkbenchFilesData;
@@ -16,6 +17,7 @@ export default class FlexiblePomoWorkbench {
     public leaf: WorkspaceLeaf;
     public modified: boolean;
     workItems: WorkItem[];
+    public current_progress_modal: CurrentProgressModal;
 
     constructor(
         leaf: WorkspaceLeaf,
@@ -27,6 +29,7 @@ export default class FlexiblePomoWorkbench {
         this.data = data;
         this.workItems = new Array<WorkItem>();
         this.modified = false;
+        this.current_progress_modal = new CurrentProgressModal(this.plugin);
     }
 
     public async unlinkItem(workItem: WorkItem) {
@@ -106,7 +109,15 @@ export default class FlexiblePomoWorkbench {
     };
 
     linkFile = async (openedFile: TFile, initialWorkItems: PomoTaskItem[]): Promise<void> => {
-        await this.view.update(openedFile,false);
+        let existingFile:boolean = false;
+        for(const workBenchFile of this.data.workbenchFiles) {
+            if(workBenchFile.path === openedFile.path) {
+                existingFile = true;
+            }
+        }
+        if(!existingFile) {
+            await this.view.update(openedFile, false);
+        }
         for(const currentItem of this.workItems) {
             if(currentItem.activeNote.path === openedFile.path) {
                 return;
