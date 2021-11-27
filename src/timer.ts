@@ -419,7 +419,7 @@ export class Timer {
             }
             if (this.settings.logPomodoroDuration === true) {
                 if(!isWorkBench) {
-                    logText = logText +  Math.floor(moment.duration(moment().diff(this.originalStartTime)).asMinutes()) + ' minute/s. ';
+                    logText = logText + ' ' +  Math.floor(moment.duration(moment().diff(this.originalStartTime)).asMinutes()) + ' minute/s. ';
                 }
             }
             if (this.settings.logPomodoroTasks === true) {
