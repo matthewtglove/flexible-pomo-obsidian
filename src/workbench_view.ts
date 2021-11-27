@@ -93,7 +93,9 @@ export class WorkbenchItemsListView extends ItemView {
                         text: currentFile.basename,
                     });
                 }
-
+                if(this.plugin.opened_file_path && currentFile.path === this.plugin.opened_file_path) {
+                    navFileTitle.addClass('red-background');
+                }
                 this.addAttributesToNavFile(navFile, currentFile, rootEl);
             });
         }

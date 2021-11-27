@@ -10,3 +10,7 @@
 .flexible-pomo-search {
     width: calc(100% - 20px);
 }
+
+.red-background {
+    background-color: darkslateblue;
+}

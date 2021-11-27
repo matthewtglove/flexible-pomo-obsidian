@@ -21,6 +21,7 @@ export default class FlexiblePomoTimerPlugin extends Plugin {
 	saving_suggester: SavingSuggester;
 	loading_suggester: LoadingSuggester;
 	fileUtility: FileUtility;
+	opened_file_path: string;
 
 	async onload() {
 		console.log('Loading status bar pomodoro timer');
@@ -211,35 +212,35 @@ export default class FlexiblePomoTimerPlugin extends Plugin {
 						return false;
 					}
 				}
-				if (this.settings.active_workbench_path) {
-					if (!checking) {
-						let workItemToRemove:WorkItem;
-						if(this.timer.mode === Mode.Pomo) {
-							for(const currentItem of this.pomoWorkBench.workItems) {
-								if(currentItem.activeNote.path === this.app.workspace.getActiveFile().path) {
-									workItemToRemove = currentItem;
-									break;
-								}
-							}
-							if(workItemToRemove) {
-								this.pomoWorkBench.modified = true;
-								this.pomoWorkBench.unlinkItem(workItemToRemove);
-								new Notice('Unlinking Active Note From Workbench');
-							}
-						} else {
-							for(const dataFile of this.pomoWorkBench.data.workbenchFiles) {
-								if(dataFile.path === this.app.workspace.getActiveFile().path) {
-									this.pomoWorkBench.modified = true;
-									this.pomoWorkBench.data.workbenchFiles.remove(dataFile);
-									break;
-								}
-							}
-							this.pomoWorkBench.view.redraw();
-						}
-					}
-					return true;
+				if(!this.checkIfActive()) {
+					return false;
 				}
-				return false;
+				if (!checking) {
+					let workItemToRemove: WorkItem;
+					if (this.timer.mode === Mode.Pomo) {
+						for (const currentItem of this.pomoWorkBench.workItems) {
+							if (currentItem.activeNote.path === this.app.workspace.getActiveFile().path) {
+								workItemToRemove = currentItem;
+								break;
+							}
+						}
+						if (workItemToRemove) {
+							this.pomoWorkBench.modified = true;
+							this.pomoWorkBench.unlinkItem(workItemToRemove);
+							new Notice('Unlinking Active Note From Workbench');
+						}
+					} else {
+						for (const dataFile of this.pomoWorkBench.data.workbenchFiles) {
+							if (dataFile.path === this.app.workspace.getActiveFile().path) {
+								this.pomoWorkBench.modified = true;
+								this.pomoWorkBench.data.workbenchFiles.remove(dataFile);
+								break;
+							}
+						}
+						this.pomoWorkBench.view.redraw();
+					}
+				}
+				return true;
 			}
 		});
 
@@ -371,6 +372,14 @@ export default class FlexiblePomoTimerPlugin extends Plugin {
 			}
 		})
 		this.parseUtility = new ParseUtility(this);
+		this.app.workspace.on("file-open", this.handleFileOpen);
+	}
+
+	handleFileOpen = async (tFile: TFile):Promise<void> => {
+		this.opened_file_path = tFile.path;
+		if(this.pomoWorkBench.view) {
+			this.pomoWorkBench.view.redraw();
+		}
 	}
 
 	private async extractWorkItems() {
