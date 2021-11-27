@@ -54,6 +54,7 @@ Use keyboard shortcuts to make everything easier.
   - [X] Add current progres indicator.
   - [X] Add active file indicator in pomo workbench leaf.
   - [ ] Add automatic Linking Mode.
+  - [ ] handle renames and deletes
   - [X] Option to have a persistent workbench
   - [X] Persistent work bench across restarts.
   - [X] Option to save workbench types.
