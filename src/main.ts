@@ -39,7 +39,15 @@ export default class FlexiblePomoTimerPlugin extends Plugin {
 		  if no timer is currently running, and otherwise quits current timer*/
 		if (this.settings.ribbonIcon === true) {
 			this.addRibbonIcon('clock', 'Start pomodoro', () => {
-				this.timer.onRibbonIconClick();
+				if((this.settings.logActiveNote && this.app.workspace.getActiveFile()) || (!this.settings.logActiveNote)) {
+					this.pomoWorkBench.modified = true;
+					this.timer.onRibbonIconClick();
+					this.pomoWorkBench.view.redraw();
+				} else {
+					if(this.settings.logActiveNote) {
+						new Notice('Please open an active note first.');
+					}
+				}
 			});
 		}
 		this.pomoWorkBench = new FlexiblePomoWorkbench(this.app.workspace.activeLeaf, this, DEFAULT_DATA);
@@ -87,6 +95,7 @@ export default class FlexiblePomoTimerPlugin extends Plugin {
 					if(!checking) {
 						this.timer = new Timer(this);
 						this.timer.triggered = false;
+						this.pomoWorkBench.modified = true;
 						this.showWorkbench();
 						this.timer.startTimer(Mode.Pomo);
 
