@@ -4,10 +4,9 @@ import type {Moment} from 'moment';
 import {notificationUrl, whiteNoiseUrl} from './audio_urls';
 import {WhiteNoise} from './white_noise';
 import {PomoSettings} from './settings';
-import PomoTimerPlugin from './main';
+import FlexiblePomoTimerPlugin from './main';
 import {confirmWithModal} from "./extend_modal";
 import {PomoTaskItem} from "./pomo_task_item";
-import {ParseUtility} from "./parse_utility";
 import {WorkItem} from "./workitem";
 
 
@@ -23,7 +22,7 @@ export const enum Mode {
 
 
 export class Timer {
-    plugin: PomoTimerPlugin;
+    plugin: FlexiblePomoTimerPlugin;
     settings: PomoSettings;
     originalStartTime: Moment;
     startTime: Moment; /*when currently running timer started*/
@@ -42,7 +41,7 @@ export class Timer {
     workItem: WorkItem;
 
 
-    constructor(plugin: PomoTimerPlugin) {
+    constructor(plugin: FlexiblePomoTimerPlugin) {
         this.plugin = plugin;
         this.settings = plugin.settings;
         this.mode = Mode.NoTimer;
@@ -54,11 +53,7 @@ export class Timer {
         this.allowExtendedPomodoroForSession = true;
         // initialize white noise player even if it it started as false so that it can be toggled.
         this.whiteNoisePlayer = new WhiteNoise(plugin, whiteNoiseUrl);
-
-
     }
-
-
 
     onRibbonIconClick() {
         if (this.mode === Mode.NoTimer) {  //if starting from not having a timer running/paused
@@ -138,7 +133,7 @@ export class Timer {
                 this.pomosSinceStart += 1;
                 if (this.settings.logging === true) {
                     await this.logPomo();
-                    await this.plugin.pomoWorkBench.stopWorkbench();
+                    await this.plugin.pomoWorkBench.view.redraw();
                 }
             } else if (this.mode === Mode.ShortBreak || this.mode === Mode.LongBreak) {
                 this.cyclesSinceLastAutoStop += 1;
@@ -195,9 +190,14 @@ export class Timer {
             this.whiteNoisePlayer.stopWhiteNoise();
         }
         this.clearActiveNote();
-        await this.plugin.pomoWorkBench.stopWorkbench();
-        await this.plugin.loadSettings(); //w
-        // hy am I loading settings on quit? to ensure that when I restart everything is correct? seems weird
+        if(this.plugin.settings.active_workbench_path) {
+            this.plugin.pomoWorkBench.modified = false;
+            await this.plugin.fileUtility.handleAppend(this.plugin.app.vault.getAbstractFileByPath(this.plugin.settings.active_workbench_path) as TFile);
+            this.plugin.pomoWorkBench.view.redraw();
+        }
+        await this.plugin.pomoWorkBench.view.redraw();
+        //await this.plugin.loadSettings(); //w
+        await this.plugin.saveSettings(); // save the setting to reflect the latest active workbench.
     }
 
 
@@ -251,24 +251,14 @@ export class Timer {
                             workItem.isStartedActiveNote = false;
                         }
                     }
-                    this.plugin.pomoWorkBench.addWorkbenchItem(this.workItem);
                     // reinitialize workbench items initial pomo tasks.
-                    let oldItems = this.plugin.pomoWorkBench.workItems.map(value => {
-                        return value;
-                    })
                     this.plugin.pomoWorkBench.workItems = new Array<WorkItem>();
-                    for(const oldItem of oldItems) {
-                        oldItem.postPomoTaskItems = new Array<PomoTaskItem>();
-                        oldItem.modifiedPomoTaskItems = new Array<PomoTaskItem>();
-                        oldItem.initialPomoTaskItems = new Array<PomoTaskItem>();
-                        this.plugin.parseUtility.gatherLineItems(oldItem,oldItem.initialPomoTaskItems, true, oldItem.activeNote);
+                    this.plugin.pomoWorkBench.addWorkbenchItem(this.workItem);
+                    for(const workBenchFile of this.plugin.pomoWorkBench.data.workbenchFiles) {
+                        const tFile:TFile = this.plugin.app.vault.getAbstractFileByPath(workBenchFile.path) as TFile;
+                        let workItem:WorkItem = new WorkItem(tFile, workBenchFile.path === this.workItem.activeNote.path ? true : false);
+                        this.plugin.parseUtility.gatherLineItems(workItem, workItem.initialPomoTaskItems, true, workItem.activeNote);
                     }
-                    /*
-                    if(!this.plugin.pomoWorkBench.view) {
-                        this.plugin.pomoWorkBench.initView();
-                    }
-                    */
-                    // reset the work item active notes.
                     this.plugin.pomoWorkBench.view.update(this.workItem.activeNote,true);
                 }
                 if (this.settings.logPomodoroTasks === true) {
@@ -280,6 +270,11 @@ export class Timer {
                 }
             }
         } else {
+            if(this.settings.active_workbench_path) {
+                this.plugin.pomoWorkBench.modified = false;
+                this.plugin.pomoWorkBench.view.redraw();
+                this.plugin.fileUtility.handleAppend(this.plugin.app.vault.getAbstractFileByPath(this.settings.active_workbench_path) as TFile);
+            }
             this.closeTimerIndicator();
             this.clearPomoTasks();
             this.clearActiveNote();
@@ -297,22 +292,13 @@ export class Timer {
                 this.workItem.activeNote ? win.loadURL('https://grassbl8d.github.io/react-stopwatch/?taskName=' + this.workItem.activeNote.basename + '&reset=true') : win.loadURL('https://grassbl8d.github.io/react-stopwatch')
             }
         }
-
         this.setStartAndEndTime(this.getTotalModeMillisecs());
         this.originalStartTime = moment();
         this.modeStartingNotification();
-
         if (this.settings.whiteNoise === true) {
             this.whiteNoisePlayer.whiteNoise();
         }
-        if(this.plugin.pomoWorkBench.view) {
-            if(mode === Mode.Pomo) {
-                this.plugin.pomoWorkBench.view.redraw();
-            } else {
-                this.plugin.pomoWorkBench.stopWorkbench();
-            }
-        }
-
+        this.plugin.pomoWorkBench.view.redraw();
     }
 
     setStartAndEndTime(millisecsLeft: number): void {

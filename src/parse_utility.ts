@@ -1,13 +1,13 @@
 import {PomoTaskItem} from "./pomo_task_item";
-import PomoTimerPlugin from "./main";
+import FlexiblePomoTimerPlugin from "./main";
 import {WorkItem} from "./workitem";
 import {TFile} from "obsidian";
 
 export class ParseUtility {
 
-    plugin: PomoTimerPlugin;
+    plugin: FlexiblePomoTimerPlugin;
 
-    constructor(plugin: PomoTimerPlugin) {
+    constructor(plugin: FlexiblePomoTimerPlugin) {
         this.plugin = plugin;
     }
 
@@ -37,7 +37,6 @@ export class ParseUtility {
         await this.plugin.app.vault.read(activeFile).then(value => {
                 activeFileContent = value;
         });
-
         this.processActiveFileContents(activeFileContent, pomoTaskItems, isStore, newWorkItem);
     }
 

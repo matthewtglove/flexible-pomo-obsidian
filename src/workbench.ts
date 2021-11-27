@@ -2,7 +2,7 @@ import {
     TFile,
     WorkspaceLeaf,
 } from 'obsidian';
-import PomoTimerPlugin from "./main";
+import FlexiblePomoTimerPlugin from "./main";
 import {WorkbenchItemsListView} from "./workbench_view";
 import {DEFAULT_DATA, defaultMaxLength, FilePath, WorkbenchItemsListViewType, WorkbenchFilesData} from "./workbench_data";
 import {WorkItem} from "./workitem";
@@ -12,19 +12,21 @@ import {Mode} from "./timer";
 export default class FlexiblePomoWorkbench {
     public data: WorkbenchFilesData;
     public view: WorkbenchItemsListView;
-    public plugin: PomoTimerPlugin;
+    public plugin: FlexiblePomoTimerPlugin;
     public leaf: WorkspaceLeaf;
+    public modified: boolean;
     workItems: WorkItem[];
 
     constructor(
         leaf: WorkspaceLeaf,
-        plugin: PomoTimerPlugin,
+        plugin: FlexiblePomoTimerPlugin,
         data: WorkbenchFilesData,
     ) {
         this.leaf = leaf;
         this.plugin = plugin;
         this.data = data;
         this.workItems = new Array<WorkItem>();
+        this.modified = false;
     }
 
     public async unlinkItem(workItem: WorkItem) {
@@ -87,14 +89,6 @@ export default class FlexiblePomoWorkbench {
         }
     }
 
-    public stopWorkbench = () => {
-        if(!this.plugin.settings.persistentWorkbench) {
-            this.data.workbenchFiles = new Array<FilePath>();
-            this.workItems = new Array<WorkItem>();
-        }
-        this.view.redraw();
-    };
-
     public initView = async (): Promise<void> => {
         let leaf: WorkspaceLeaf = null;
         for (leaf of this.plugin.app.workspace.getLeavesOfType(WorkbenchItemsListViewType)) {
@@ -118,10 +112,12 @@ export default class FlexiblePomoWorkbench {
                 return;
             }
         }
-        let newWorkItem = new WorkItem(this.plugin.app.workspace.getActiveFile(), false);
-        await this.plugin.parseUtility.gatherLineItems(newWorkItem, newWorkItem.initialPomoTaskItems, true, this.plugin.app.workspace.getActiveFile());
-        if(initialWorkItems) {
-            newWorkItem.initialPomoTaskItems = initialWorkItems;
+        if(this.plugin.timer.mode === Mode.Pomo) {
+            let newWorkItem = new WorkItem(this.plugin.app.workspace.getActiveFile(), false);
+            await this.plugin.parseUtility.gatherLineItems(newWorkItem, newWorkItem.initialPomoTaskItems, true, this.plugin.app.workspace.getActiveFile());
+            if(initialWorkItems) {
+                newWorkItem.initialPomoTaskItems = initialWorkItems;
+            }
         }
     }
 

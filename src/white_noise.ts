@@ -1,11 +1,11 @@
-import PomoTimerPlugin from './main';
+import FlexiblePomoTimerPlugin from './main';
 import { Mode } from './timer'
 
 export class WhiteNoise {
-	plugin: PomoTimerPlugin;
+	plugin: FlexiblePomoTimerPlugin;
 	whiteNoisePlayer: HTMLAudioElement;
 
-	constructor(plugin: PomoTimerPlugin, whiteNoiseUrl: string) {
+	constructor(plugin: FlexiblePomoTimerPlugin, whiteNoiseUrl: string) {
 		this.plugin = plugin;
 		this.whiteNoisePlayer = new Audio(whiteNoiseUrl);
 		this.whiteNoisePlayer.loop = true;
