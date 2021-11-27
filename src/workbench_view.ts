@@ -1,17 +1,17 @@
 import {ItemView, Menu, Notice, TFile, WorkspaceLeaf,} from 'obsidian';
 
-import PomoTimerPlugin from "./main";
+import FlexiblePomoTimerPlugin from "./main";
 import {FilePath, WorkbenchFilesData, WorkbenchItemsListViewType} from "./workbench_data";
 import FlexiblePomoWorkbench from "./workbench";
 
 export class WorkbenchItemsListView extends ItemView {
-    private readonly plugin: PomoTimerPlugin;
+    private readonly plugin: FlexiblePomoTimerPlugin;
     private data: WorkbenchFilesData;
     private workbench: FlexiblePomoWorkbench;
 
     constructor(
         leaf: WorkspaceLeaf,
-        plugin: PomoTimerPlugin,
+        plugin: FlexiblePomoTimerPlugin,
         data: WorkbenchFilesData,
         workbench: FlexiblePomoWorkbench,
     ) {
@@ -59,6 +59,25 @@ export class WorkbenchItemsListView extends ItemView {
         }
         const rootEl = createDiv({ cls: 'nav-folder mod-root' });
         const childrenEl = rootEl.createDiv({ cls: 'nav-folder-children' });
+
+        if(this.plugin.settings.active_workbench_path) {
+            let workbenchFile:TFile = (this.plugin.app.vault.getAbstractFileByPath(this.plugin.settings.active_workbench_path) as TFile)
+            const navFile = childrenEl.createDiv({ cls: 'nav-file' });
+            const navFileTitle = navFile.createDiv({ cls: 'nav-file-title' });
+            if(this.workbench.modified) {
+                navFileTitle.createDiv({
+                    cls: 'nav-file-title-content',
+                    text: '?WORKBENCH: ' + workbenchFile.basename,
+                });
+            } else {
+                navFileTitle.createDiv({
+                    cls: 'nav-file-title-content',
+                    text: 'WORKBENCH: ' + workbenchFile.basename,
+                });
+
+            }
+            this.addAttributesToNavFile(navFile, workbenchFile, rootEl);
+        }
         if(this.data) {
             this.data.workbenchFiles.forEach((currentFile) => {
                 const navFile = childrenEl.createDiv({ cls: 'nav-file' });

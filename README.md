@@ -148,12 +148,28 @@ This will enable the user to log tasks added and completed with these multiple f
 
 ### Persistent Workbench
 
-Allows pomodoro workbench to persist across Pomodoro sequences. Pomodoros will remain even after the Pomodoro timer has 
-ended. Workbench can be cleared using the **Clear Pomo Workbench** command.
+Persisten workbenches enable you to save different types of Workbenches in a folder in your vault. This enables the plugin
+to persist Workbenches across restart and enables the user to save different types of workbenches.
 
-Note: Persistent workbench across Obsidian restarts is not yet implemented. 
+Please be sure to set your workbench folder first.
 
-![](persistent_workbench.png)
+![](pomopersistentfolder.GIF)
+
+### Save Your WorkBench
+
+Save your workbench
+
+To make a workbench persistent, be sure to call **Save Pomo Workbench** command. 
+
+![](savepomoworkbench.GIF)
+
+
+### Load A Workbench
+
+Load a workbench  command loads previously created workbenches.
+
+![](loadworkbench.GIF)
+
 
 ### Additional Commands
 
@@ -172,6 +188,34 @@ Starts a long break manually.
 Reveals the active Pomdoro note to the right pane.
 
 ![img_4.png](img_4.png)
+
+#### Save Pomo Workbench
+
+Save the Pomo workbench to a file. You can choose a new one or an old one. Saving overrides all the contents of the file
+but history is still stored in your Workbench folder.
+
+Files will be persisted in your workbench folder.
+
+![](persistedworkbench2.png)
+
+
+#### Save PomoWorkbench
+
+Saves the current workbench into the Workbench folder. This command will always override the existing content. If you 
+want to save your changes, you can just use Persist Workbench.
+
+#### Persist Pomo Workbench
+
+Persist Pomo Workbench commands enable you to save the current state of your workbench if you linked or unlinked any files.
+A new version will be stored inside your Workbench file.
+
+#### Load Pomo Workbench
+
+Loads a previously created Pomoworkbench.
+
+#### Unload Pomo Workbench
+
+Enables you to unload the current persistent workbench loaded.
 
 #### Link Active File To Workbench
 

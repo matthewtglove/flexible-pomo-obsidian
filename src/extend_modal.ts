@@ -1,10 +1,10 @@
 import { App, ButtonComponent, Modal } from "obsidian";
-import PomoTimerPlugin from './main';
+import FlexiblePomoTimerPlugin from './main';
 
 export async function confirmWithModal(
     app: App,
     text: string,
-    plugin: PomoTimerPlugin,
+    plugin: FlexiblePomoTimerPlugin,
     buttons: { cta: string; secondary: string; thirdaction: string; } = {
         cta: "Yes",
         secondary: "No",
@@ -23,7 +23,7 @@ export async function confirmWithModal(
 export class ExtendPomodoroModal extends Modal {
     constructor(
         app: App,
-        plugin: PomoTimerPlugin,
+        plugin: FlexiblePomoTimerPlugin,
         public text: string,
         public buttons: { cta: string; secondary: string; thirdaction: string }
     ) {
@@ -31,7 +31,7 @@ export class ExtendPomodoroModal extends Modal {
         this._plugin = plugin;
     }
     confirmed: boolean = false;
-    _plugin: PomoTimerPlugin;
+    _plugin: FlexiblePomoTimerPlugin;
 
     async display() {
         new Promise((resolve) => {

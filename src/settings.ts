@@ -1,8 +1,9 @@
 import { App, Notice, PluginSettingTab, Setting } from 'obsidian';
 import { appHasDailyNotesPluginLoaded } from 'obsidian-daily-notes-interface';
 import { whiteNoiseUrl } from './audio_urls';
-import PomoTimerPlugin from './main';
+import FlexiblePomoTimerPlugin from './main';
 import { WhiteNoise } from './white_noise';
+import {FolderSuggest} from "./flexipomosuggesters/FolderSuggester";
 
 export interface PomoSettings {
 	pomo: number;
@@ -26,7 +27,9 @@ export interface PomoSettings {
 	showActiveNoteInTimer: boolean;
 	allowExtendedPomodoro: boolean;
 	betterIndicator: boolean;
-	persistentWorkbench: boolean;
+	templates_folder: string;
+	active_workbench: string;
+	active_workbench_path: string;
 }
 
 export const DEFAULT_SETTINGS: PomoSettings = {
@@ -51,14 +54,16 @@ export const DEFAULT_SETTINGS: PomoSettings = {
 	showActiveNoteInTimer: false,
 	allowExtendedPomodoro: false,
 	betterIndicator: false,
-	persistentWorkbench: true,
+	templates_folder: "",
+	active_workbench: "",
+	active_workbench_path: "",
 }
 
 
 export class PomoSettingTab extends PluginSettingTab {
-	plugin: PomoTimerPlugin;
+	plugin: FlexiblePomoTimerPlugin;
 
-	constructor(app: App, plugin: PomoTimerPlugin) {
+	constructor(app: App, plugin: FlexiblePomoTimerPlugin) {
 		super(app, plugin);
 		this.plugin = plugin;
 	}
@@ -145,9 +150,6 @@ export class PomoSettingTab extends PluginSettingTab {
 					}));
 		}
 
-
-
-
 		/**************  Sound settings **************/
 			
 		new Setting(containerEl)
@@ -179,19 +181,22 @@ export class PomoSettingTab extends PluginSettingTab {
 						this.display();
 					}));
 
-		new Setting(containerEl)
-			.setName("Persistent Workbench")
-			.setDesc("Option to retain workbench after Pomodoro ends.")
-			.addToggle(toggle => toggle
-				.setValue(this.plugin.settings.persistentWorkbench)
-				.onChange(value => {
-					this.plugin.settings.persistentWorkbench = value;
-					this.plugin.saveSettings();
-					this.display();
-				}));
+		new Setting(this.containerEl)
+			.setName("Workbench Folder location")
+			.setDesc("Files in this folder will be available as workbenches.")
+			.addSearch((cb) => {
+				new FolderSuggest(this.app, cb.inputEl);
+				cb.setPlaceholder("Example: folder1/folder2")
+					.setValue(this.plugin.settings.templates_folder)
+					.onChange((new_folder) => {
+						this.plugin.settings.templates_folder = new_folder;
+						this.plugin.saveSettings();
+					});
+				// @ts-ignore
+				cb.containerEl.addClass("flexible-pomo-search");
+			});
 
 		/**************  Logging settings **************/
-
 		new Setting(containerEl)
 			.setName("Logging")
 			.setDesc("Enable a log of completed pomodoros")

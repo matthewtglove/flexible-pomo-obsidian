@@ -1,27 +1,32 @@
-import {addIcon, MarkdownView, Notice, Plugin, WorkspaceLeaf} from 'obsidian';
+import {addIcon, MarkdownView, Notice, Plugin, TFile} from 'obsidian';
 import * as feather from 'feather-icons'; //import just icons I want?
-import { PomoSettingTab, PomoSettings, DEFAULT_SETTINGS } from './settings';
-import { getDailyNoteFile, Mode, Timer } from './timer';
+import {DEFAULT_SETTINGS, PomoSettings, PomoSettingTab} from './settings';
+import {getDailyNoteFile, Mode, Timer} from './timer';
 import FlexiblePomoWorkbench from "./workbench";
-import {DEFAULT_DATA, FilePath, WorkbenchItemsListViewType} from "./workbench_data";
+import {DEFAULT_DATA, WorkbenchItemsListViewType} from "./workbench_data";
 import {ParseUtility} from "./parse_utility";
 import {WorkItem} from "./workitem";
 import {WorkbenchItemsListView} from "./workbench_view";
+import {SavingSuggester} from "./flexipomosuggesters/SavingSuggester";
+import {LoadingSuggester} from "./flexipomosuggesters/LoadingSuggester";
+import {FileUtility} from "./file_utility";
 
 
-export default class PomoTimerPlugin extends Plugin {
+export default class FlexiblePomoTimerPlugin extends Plugin {
 	settings: PomoSettings;
 	statusBar: HTMLElement;
 	timer: Timer;
 	pomoWorkBench: FlexiblePomoWorkbench;
 	parseUtility: ParseUtility;
+	saving_suggester: SavingSuggester;
+	loading_suggester: LoadingSuggester;
+	fileUtility: FileUtility;
 
 	async onload() {
 		console.log('Loading status bar pomodoro timer');
-
 		// detach old leaves during the start. This make sure that you are always using the latest type.
 		this.app.workspace.detachLeavesOfType(WorkbenchItemsListViewType);
-
+		//reload settings during the start.
 		await this.loadSettings();
 		this.addSettingTab(new PomoSettingTab(this.app, this));
 		this.statusBar = this.addStatusBarItem();
@@ -37,9 +42,10 @@ export default class PomoTimerPlugin extends Plugin {
 				this.timer.onRibbonIconClick();
 			});
 		}
-
-		//addIcon('sweep', sweepIcon);
 		this.pomoWorkBench = new FlexiblePomoWorkbench(this.app.workspace.activeLeaf, this, DEFAULT_DATA);
+		this.fileUtility = new FileUtility(this);
+		this.saving_suggester = new SavingSuggester(this);
+		this.loading_suggester = new LoadingSuggester(this);
 		this.registerView(
 			WorkbenchItemsListViewType,
 			//TODO : Fix this
@@ -181,18 +187,17 @@ export default class PomoTimerPlugin extends Plugin {
 			name: 'Link File To Active WorkBench',
 			icon: 'feather-add',
 			checkCallback: (checking: boolean) => {
-				if (this.timer.mode !== Mode.NoTimer && (this.timer.workItem && this.timer.workItem.activeNote && this.app.workspace.getActiveFile() && (this.timer.workItem.activeNote.path !== this.app.workspace.getActiveFile().path))) {
-					if(this.checkIfActive()) {
-						return false;
-					}
+				if (this.checkIfActive()) {
+					return false;
+				} else {
 					if (!checking) {
+						this.pomoWorkBench.modified = true;
 						this.pomoWorkBench.linkFile(this.app.workspace.getActiveFile(), null);
 						this.showWorkbench();
 						new Notice('Linking Active Note to Workbench');
 					}
 					return true;
 				}
-				return false;
 			}
 		});
 
@@ -201,21 +206,35 @@ export default class PomoTimerPlugin extends Plugin {
 			name: 'Unlink File From Active Workbench',
 			icon: 'feather-remove',
 			checkCallback: (checking: boolean) => {
-				if (this.timer.mode !== Mode.NoTimer && (this.timer.workItem && this.timer.workItem.activeNote && this.app.workspace.getActiveFile() && (this.timer.workItem.activeNote.path !== this.app.workspace.getActiveFile().path))) {
-					if(!this.checkIfActive()) {
+				if(this.timer.mode === Mode.Pomo) {
+					if(this.checkIfActiveTimerOn()) {
 						return false;
 					}
+				}
+				if (this.settings.active_workbench_path) {
 					if (!checking) {
 						let workItemToRemove:WorkItem;
-						for(const currentItem of this.pomoWorkBench.workItems) {
-							if(currentItem.activeNote.path === this.app.workspace.getActiveFile().path) {
-								workItemToRemove = currentItem;
-								break;
+						if(this.timer.mode === Mode.Pomo) {
+							for(const currentItem of this.pomoWorkBench.workItems) {
+								if(currentItem.activeNote.path === this.app.workspace.getActiveFile().path) {
+									workItemToRemove = currentItem;
+									break;
+								}
 							}
-						}
-						if(workItemToRemove) {
-							this.pomoWorkBench.unlinkItem(workItemToRemove);
-							new Notice('Unlinking Active Note From Workbench');
+							if(workItemToRemove) {
+								this.pomoWorkBench.modified = true;
+								this.pomoWorkBench.unlinkItem(workItemToRemove);
+								new Notice('Unlinking Active Note From Workbench');
+							}
+						} else {
+							for(const dataFile of this.pomoWorkBench.data.workbenchFiles) {
+								if(dataFile.path === this.app.workspace.getActiveFile().path) {
+									this.pomoWorkBench.modified = true;
+									this.pomoWorkBench.data.workbenchFiles.remove(dataFile);
+									break;
+								}
+							}
+							this.pomoWorkBench.view.redraw();
 						}
 					}
 					return true;
@@ -238,6 +257,8 @@ export default class PomoTimerPlugin extends Plugin {
 			name: 'Clear Pomo Workbench',
 			icon: 'feather-clear',
 			callback: () => {
+				let workbenchFile:TFile = this.app.vault.getAbstractFileByPath(this.settings.active_workbench_path) as TFile;
+				console.log(workbenchFile)
 				this.pomoWorkBench.clearWorkBench();
 			}
 		});
@@ -257,7 +278,90 @@ export default class PomoTimerPlugin extends Plugin {
 			}
 		});
 
+		this.addCommand({
+			id: "flexible-save-workbench",
+			name: "Save Pomo Workbench",
+			callback: () => {
+				this.pomoWorkBench.modified = false;
+				this.saving_suggester.insert_template();
+				this.saveSettings();
+			},
+		});
+
+		this.addCommand({
+			id: "flexible-persist-workbench",
+			name: "Persist Pomo Workbench",
+			checkCallback: (checking) => {
+				if(this.settings.active_workbench_path) {
+					if(!checking) {
+						if(this.timer.mode !== Mode.Pomo) {
+							this.pomoWorkBench.modified = false;
+							this.pomoWorkBench.workItems = new Array<WorkItem>();
+							this.extractWorkItems().then(value => {
+								this.fileUtility.handleAppend(this.app.vault.getAbstractFileByPath(this.settings.active_workbench_path) as TFile);
+							})
+						} else {
+							this.pomoWorkBench.modified = false;
+							this.fileUtility.handleAppend(this.app.vault.getAbstractFileByPath(this.settings.active_workbench_path) as TFile);
+						}
+						this.pomoWorkBench.view.redraw();
+					}
+					return true;
+				}
+				return false;
+			},
+		});
+
+		this.addCommand({
+			id: "flexible-load-workbench",
+			name: "Load Pomo Workbench",
+			checkCallback: (checking) => {
+				if(this.timer.mode !== Mode.Pomo) {
+					if(!checking) {
+						this.loading_suggester.insert_template();
+					}
+					return true;
+				}
+				return false;
+			},
+		});
+
+		this.addCommand({
+			id: "flexible-unload-workbench",
+			name: "Unload Pomo Workbench",
+			checkCallback: (checking) => {
+				if(this.timer.mode !== Mode.Pomo && this.settings.active_workbench && this.settings.active_workbench_path) {
+					if(!checking) {
+						this.settings.active_workbench_path = "";
+						this.settings.active_workbench = "";
+						if(this.pomoWorkBench.view) {
+							this.pomoWorkBench.clearWorkBench();
+						}
+						this.saveSettings();
+						new Notice('Unloaded current Workbench.');
+					}
+					return true;
+				}
+				return false;
+			},
+		});
+
+		this.app.workspace.onLayoutReady(() => {
+			if(this.settings.active_workbench_path) {
+				if(this.settings.active_workbench_path) {
+					this.fileUtility.loadItems(this.settings.active_workbench_path, null);
+				}
+			}
+		})
 		this.parseUtility = new ParseUtility(this);
+	}
+
+	private async extractWorkItems() {
+		for (const workBenchFile of this.pomoWorkBench.data.workbenchFiles) {
+			const tFile: TFile = this.app.vault.getAbstractFileByPath(workBenchFile.path) as TFile;
+			let workItem: WorkItem = new WorkItem(tFile, true);
+			await this.parseUtility.gatherLineItems(workItem, workItem.initialPomoTaskItems, true, workItem.activeNote);
+		}
 	}
 
 	private  async showWorkbench() {
@@ -272,9 +376,20 @@ export default class PomoTimerPlugin extends Plugin {
 	}
 
 	private checkIfActive():boolean {
+		if (this.pomoWorkBench && this.pomoWorkBench.data.workbenchFiles.length) {
+			for (const currentFile of this.pomoWorkBench.data.workbenchFiles) {
+				if (currentFile.path === this.app.workspace.getActiveFile().path) {
+					return true;
+				}
+			}
+			return false;
+		}
+	}
+
+	private checkIfActiveTimerOn():boolean {
 		if (this.pomoWorkBench && this.pomoWorkBench.workItems.length) {
 			for (const currentItem of this.pomoWorkBench.workItems) {
-				if (currentItem.activeNote.path === this.app.workspace.getActiveFile().path) {
+				if (currentItem.isStartedActiveNote &&  currentItem.activeNote.path === this.app.workspace.getActiveFile().path) {
 					return true;
 				}
 			}
@@ -303,8 +418,13 @@ export default class PomoTimerPlugin extends Plugin {
 	}
 
 	/**************  Meta  **************/
-
 	onunload() {
+		try {
+			if (this.timer.win) {
+				this.timer.win.close();
+			}
+		} catch (e) {
+		}
 		this.timer.quitTimer();
 		(this.app.workspace as any).unregisterHoverLinkSource(
 			WorkbenchItemsListViewType,

@@ -5,3 +5,8 @@
 .statusbar-pomo-logging:hover {
     cursor: pointer;
 }
+
+
+.flexible-pomo-search {
+    width: calc(100% - 20px);
+}
