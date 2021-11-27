@@ -146,7 +146,7 @@ export class WorkbenchItemsListView extends ItemView {
         });
     }
 
-    private readonly updateData = async (file: TFile, isActiveNote: boolean): Promise<void> => {
+    private readonly updateData = async (file: TFile): Promise<void> => {
         if (this.data) {
             for (const workbenchFile of this.data.workbenchFiles) {
                 if (workbenchFile.path === file.path) {
@@ -164,28 +164,23 @@ export class WorkbenchItemsListView extends ItemView {
         await this.workbench.pruneLength(); // Handles the save
     };
 
-    update = async (openedFile: TFile, isForceActiveNote: boolean): Promise<void> => {
+    update = async (openedFile: TFile): Promise<void> => {
         let activeNoteInWorkBench:FilePath;
         let isActiveNote:boolean = false;
-        if(!isForceActiveNote) {
-            for (const filePath of this.data.workbenchFiles) {
-                if (filePath.path === openedFile.path && this.plugin.timer.workItem && this.plugin.timer.workItem.activeNote.path === openedFile.path) {
-                    activeNoteInWorkBench = openedFile;
-                    isActiveNote = true;
-                    break;
-                }
+        for (const filePath of this.data.workbenchFiles) {
+            if (filePath.path === openedFile.path && this.plugin.timer.workItem && this.plugin.timer.workItem.activeNote.path === openedFile.path) {
+                activeNoteInWorkBench = openedFile;
+                isActiveNote = true;
+                break;
             }
-        } else {
-            isActiveNote = true;
         }
-
         if(activeNoteInWorkBench) {
             this.data.workbenchFiles.remove(activeNoteInWorkBench);
         }
         if (!openedFile || !this.workbench.shouldAddFile(openedFile)) {
             return;
         }
-        await this.updateData(openedFile, isActiveNote);
+        await this.updateData(openedFile);
         this.redraw();
     };
 

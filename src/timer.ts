@@ -260,7 +260,7 @@ export class Timer {
                         let workItem:WorkItem = new WorkItem(tFile, workBenchFile.path === this.workItem.activeNote.path ? true : false);
                         this.plugin.parseUtility.gatherLineItems(workItem, workItem.initialPomoTaskItems, true, workItem.activeNote);
                     }
-                    this.plugin.pomoWorkBench.view.update(this.workItem.activeNote,true);
+                    this.plugin.pomoWorkBench.view.update(this.workItem.activeNote);
                 }
                 if (this.settings.logPomodoroTasks === true) {
                     //reset the pomo holders.

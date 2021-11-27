@@ -116,7 +116,7 @@ export default class FlexiblePomoWorkbench {
             }
         }
         if(!existingFile) {
-            await this.view.update(openedFile, false);
+            await this.view.update(openedFile);
         }
         for(const currentItem of this.workItems) {
             if(currentItem.activeNote.path === openedFile.path) {

@@ -34,7 +34,7 @@ export class FileUtility {
                                 let tFile:TFile = this.plugin.app.vault.getAbstractFileByPath(normalizePath(csvEntry.trim())) as TFile;
                                 if(tFile) {
                                     if(tFile.name) {
-                                        this.plugin.pomoWorkBench.view.update(tFile, false);
+                                        this.plugin.pomoWorkBench.view.update(tFile);
                                     }
                                 }
                             }
