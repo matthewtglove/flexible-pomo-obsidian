@@ -24,7 +24,6 @@ export default class FlexiblePomoTimerPlugin extends Plugin {
 	opened_file_path: string;
 
 	async onload() {
-		console.log('Loading status bar pomodoro timer');
 		// detach old leaves during the start. This make sure that you are always using the latest type.
 		this.app.workspace.detachLeavesOfType(WorkbenchItemsListViewType);
 		//reload settings during the start.
@@ -259,7 +258,6 @@ export default class FlexiblePomoTimerPlugin extends Plugin {
 			icon: 'feather-clear',
 			callback: () => {
 				let workbenchFile:TFile = this.app.vault.getAbstractFileByPath(this.settings.active_workbench_path) as TFile;
-				console.log(workbenchFile)
 				this.pomoWorkBench.clearWorkBench();
 			}
 		});
@@ -474,7 +472,6 @@ export default class FlexiblePomoTimerPlugin extends Plugin {
 					}
 					this.app.workspace.openLinkText(file, '', false);
 				} catch (error) {
-					console.log(error);
 				}
 			}
 		});
@@ -492,7 +489,6 @@ export default class FlexiblePomoTimerPlugin extends Plugin {
 		(this.app.workspace as any).unregisterHoverLinkSource(
 			WorkbenchItemsListViewType,
 		);
-		console.log('Unloading status bar pomodoro timer');
 	}
 
 	async loadSettings() {

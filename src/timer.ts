@@ -402,7 +402,6 @@ export class Timer {
             let file = this.plugin.app.vault.getAbstractFileByPath(this.settings.logFile);
 
             if (!file || file ! instanceof TFolder) { //if no file, create
-                console.log("Creating pomodoro log file");
                 await this.plugin.app.vault.create(this.settings.logFile, "");
             }
 

@@ -31,7 +31,6 @@ export class FileUtility {
                             let csv:string[];
                             csv = line.substring(7).split(',');
                             for(const csvEntry of csv) {
-                                console.log(csvEntry);
                                 let tFile:TFile = this.plugin.app.vault.getAbstractFileByPath(normalizePath(csvEntry.trim())) as TFile;
                                 if(tFile) {
                                     if(tFile.name) {
