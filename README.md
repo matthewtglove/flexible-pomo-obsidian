@@ -51,12 +51,12 @@ Use keyboard shortcuts to make everything easier.
   - [X] Include completed tasks/new tasks for Active Note.
 - [ ] Pomo Workbench
   - [X] Track multiple files during a pomodoro period.
-  - [ ] Add preview current workbench contents.
+  - [X] Add current progres indicator.
   - [ ] Add active file indicator in pomo workbench leaf.
   - [ ] Add automatic Linking Mode.
   - [X] Option to have a persistent workbench
-  - [ ] Persistent work bench across restarts.
-  - [ ] Option to save workbench types.
+  - [X] Persistent work bench across restarts.
+  - [X] Option to save workbench types.
   - [ ] Option to include Daily Note in WorkBench/logging.
 
 
