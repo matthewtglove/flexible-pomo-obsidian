@@ -260,7 +260,7 @@ export class Timer {
                         let workItem:WorkItem = new WorkItem(tFile, workBenchFile.path === this.workItem.activeNote.path ? true : false);
                         this.plugin.parseUtility.gatherLineItems(workItem, workItem.initialPomoTaskItems, true, workItem.activeNote);
                     }
-                    this.plugin.pomoWorkBench.view.update(this.workItem.activeNote,true);
+                    this.plugin.pomoWorkBench.view.update(this.workItem.activeNote);
                 }
                 if (this.settings.logPomodoroTasks === true) {
                     //reset the pomo holders.
@@ -387,8 +387,9 @@ export class Timer {
     /**************  Logging  **************/
     async logPomo(): Promise<void> {
         var logText = moment().format(this.settings.logText);
-        logText = '- ' + await this.extractLog(this.workItem, logText, false);
-
+        if(this.plugin.app.workspace.getActiveFile()) {
+            logText = '- ' + await this.extractLog(this.workItem, logText, false);
+        }
         for(const workItem of this.plugin.pomoWorkBench.workItems) {
             if(!workItem.isStartedActiveNote) {
                 logText =   await this.extractLog(workItem, logText, true);
@@ -402,7 +403,6 @@ export class Timer {
             let file = this.plugin.app.vault.getAbstractFileByPath(this.settings.logFile);
 
             if (!file || file ! instanceof TFolder) { //if no file, create
-                console.log("Creating pomodoro log file");
                 await this.plugin.app.vault.create(this.settings.logFile, "");
             }
 
@@ -420,7 +420,7 @@ export class Timer {
             }
             if (this.settings.logPomodoroDuration === true) {
                 if(!isWorkBench) {
-                    logText = logText +  Math.floor(moment.duration(moment().diff(this.originalStartTime)).asMinutes()) + ' minute/s. ';
+                    logText = logText + ' ' +  Math.floor(moment.duration(moment().diff(this.originalStartTime)).asMinutes()) + ' minute/s. ';
                 }
             }
             if (this.settings.logPomodoroTasks === true) {

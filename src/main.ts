@@ -1,4 +1,4 @@
-import {addIcon, MarkdownView, Notice, Plugin, TFile} from 'obsidian';
+import {addIcon, MarkdownView, Notice, Plugin, TAbstractFile, TFile} from 'obsidian';
 import * as feather from 'feather-icons'; //import just icons I want?
 import {DEFAULT_SETTINGS, PomoSettings, PomoSettingTab} from './settings';
 import {getDailyNoteFile, Mode, Timer} from './timer';
@@ -24,7 +24,6 @@ export default class FlexiblePomoTimerPlugin extends Plugin {
 	opened_file_path: string;
 
 	async onload() {
-		console.log('Loading status bar pomodoro timer');
 		// detach old leaves during the start. This make sure that you are always using the latest type.
 		this.app.workspace.detachLeavesOfType(WorkbenchItemsListViewType);
 		//reload settings during the start.
@@ -216,29 +215,7 @@ export default class FlexiblePomoTimerPlugin extends Plugin {
 					return false;
 				}
 				if (!checking) {
-					let workItemToRemove: WorkItem;
-					if (this.timer.mode === Mode.Pomo) {
-						for (const currentItem of this.pomoWorkBench.workItems) {
-							if (currentItem.activeNote.path === this.app.workspace.getActiveFile().path) {
-								workItemToRemove = currentItem;
-								break;
-							}
-						}
-						if (workItemToRemove) {
-							this.pomoWorkBench.modified = true;
-							this.pomoWorkBench.unlinkItem(workItemToRemove);
-							new Notice('Unlinking Active Note From Workbench');
-						}
-					} else {
-						for (const dataFile of this.pomoWorkBench.data.workbenchFiles) {
-							if (dataFile.path === this.app.workspace.getActiveFile().path) {
-								this.pomoWorkBench.modified = true;
-								this.pomoWorkBench.data.workbenchFiles.remove(dataFile);
-								break;
-							}
-						}
-						this.pomoWorkBench.view.redraw();
-					}
+					this.unlinkFile(this.app.workspace.getActiveFile());
 				}
 				return true;
 			}
@@ -259,7 +236,6 @@ export default class FlexiblePomoTimerPlugin extends Plugin {
 			icon: 'feather-clear',
 			callback: () => {
 				let workbenchFile:TFile = this.app.vault.getAbstractFileByPath(this.settings.active_workbench_path) as TFile;
-				console.log(workbenchFile)
 				this.pomoWorkBench.clearWorkBench();
 			}
 		});
@@ -407,15 +383,83 @@ export default class FlexiblePomoTimerPlugin extends Plugin {
 		})
 		this.parseUtility = new ParseUtility(this);
 		this.app.workspace.on("file-open", this.handleFileOpen);
+		this.registerEvent(this.app.vault.on('delete', this.handleDelete));
+		this.registerEvent(this.app.vault.on('rename', this.handleRename));
 	}
 
 
+	private unlinkFile(tFile:TFile) {
+		let workItemToRemove: WorkItem;
+		if (this.timer.mode === Mode.Pomo) {
+			for (const currentItem of this.pomoWorkBench.workItems) {
+				if (currentItem.activeNote.path === tFile.path) {
+					workItemToRemove = currentItem;
+					break;
+				}
+			}
+			if (workItemToRemove) {
+				this.pomoWorkBench.modified = true;
+				this.pomoWorkBench.unlinkItem(workItemToRemove);
+				new Notice('Unlinking Active Note From Workbench');
+			}
+		} else {
+			for (const dataFile of this.pomoWorkBench.data.workbenchFiles) {
+				if (dataFile.path === tFile.path) {
+					this.pomoWorkBench.modified = true;
+					this.pomoWorkBench.data.workbenchFiles.remove(dataFile);
+					break;
+				}
+			}
+			this.pomoWorkBench.view.redraw();
+		}
+	}
 
+	private readonly handleDelete = async (
+		file: TAbstractFile,
+	): Promise<void> => {
+		this.unlinkFile(file as TFile);
+	};
+
+
+	private readonly handleRename = async (
+		file: TAbstractFile,
+		oldPath: string,
+	): Promise<void> => {
+		console.log('old path is ' + oldPath);
+		let workbenchFileToRemove:FilePath;
+		for(const workbenchFile of this.pomoWorkBench.data.workbenchFiles) {
+			if(workbenchFile.path === oldPath) {
+				workbenchFileToRemove = workbenchFile;
+				break;
+			}
+		}
+		if(workbenchFileToRemove) {
+			this.pomoWorkBench.data.workbenchFiles.remove(workbenchFileToRemove);
+		}
+		if(this.timer.mode === Mode.Pomo) {
+			let workItemToRemove:WorkItem;
+			for(const workItem of this.pomoWorkBench.workItems) {
+				if(workItem.activeNote.path === oldPath) {
+					workItemToRemove = workItem;
+					break;
+				}
+			}
+			if(workItemToRemove) {
+				this.pomoWorkBench.workItems.remove(workItemToRemove);
+			}
+		}
+		this.pomoWorkBench.modified = true;
+		this.opened_file_path = file.path;
+		this.pomoWorkBench.linkFile(file as TFile, null);
+		this.pomoWorkBench.view.redraw();
+	};
 
 	handleFileOpen = async (tFile: TFile):Promise<void> => {
-		this.opened_file_path = tFile.path;
-		if(this.pomoWorkBench.view) {
-			this.pomoWorkBench.view.redraw();
+		if(tFile) {
+			this.opened_file_path = tFile.path;
+			if (this.pomoWorkBench.view) {
+				this.pomoWorkBench.view.redraw();
+			}
 		}
 	}
 
@@ -439,7 +483,7 @@ export default class FlexiblePomoTimerPlugin extends Plugin {
 	}
 
 	private checkIfActive():boolean {
-		if (this.pomoWorkBench && this.pomoWorkBench.data.workbenchFiles.length) {
+		if (this.pomoWorkBench && this.pomoWorkBench.data.workbenchFiles.length && this.app.workspace.getActiveFile()) {
 			for (const currentFile of this.pomoWorkBench.data.workbenchFiles) {
 				if (currentFile.path === this.app.workspace.getActiveFile().path) {
 					return true;
@@ -450,7 +494,7 @@ export default class FlexiblePomoTimerPlugin extends Plugin {
 	}
 
 	private checkIfActiveTimerOn():boolean {
-		if (this.pomoWorkBench && this.pomoWorkBench.workItems.length) {
+		if (this.pomoWorkBench && this.pomoWorkBench.workItems.length && this.app.workspace.getActiveFile()) {
 			for (const currentItem of this.pomoWorkBench.workItems) {
 				if (currentItem.isStartedActiveNote &&  currentItem.activeNote.path === this.app.workspace.getActiveFile().path) {
 					return true;
@@ -474,7 +518,6 @@ export default class FlexiblePomoTimerPlugin extends Plugin {
 					}
 					this.app.workspace.openLinkText(file, '', false);
 				} catch (error) {
-					console.log(error);
 				}
 			}
 		});
@@ -492,7 +535,6 @@ export default class FlexiblePomoTimerPlugin extends Plugin {
 		(this.app.workspace as any).unregisterHoverLinkSource(
 			WorkbenchItemsListViewType,
 		);
-		console.log('Unloading status bar pomodoro timer');
 	}
 
 	async loadSettings() {
