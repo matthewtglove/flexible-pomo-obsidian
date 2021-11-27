@@ -425,16 +425,41 @@ export default class FlexiblePomoTimerPlugin extends Plugin {
 		file: TAbstractFile,
 		oldPath: string,
 	): Promise<void> => {
+		console.log('old path is ' + oldPath);
+		let workbenchFileToRemove:FilePath;
+		for(const workbenchFile of this.pomoWorkBench.data.workbenchFiles) {
+			if(workbenchFile.path === oldPath) {
+				workbenchFileToRemove = workbenchFile;
+				break;
+			}
+		}
+		if(workbenchFileToRemove) {
+			this.pomoWorkBench.data.workbenchFiles.remove(workbenchFileToRemove);
+		}
+		if(this.timer.mode === Mode.Pomo) {
+			let workItemToRemove:WorkItem;
+			for(const workItem of this.pomoWorkBench.workItems) {
+				if(workItem.activeNote.path === oldPath) {
+					workItemToRemove = workItem;
+					break;
+				}
+			}
+			if(workItemToRemove) {
+				this.pomoWorkBench.workItems.remove(workItemToRemove);
+			}
+		}
 		this.pomoWorkBench.modified = true;
-		debugger;
+		this.opened_file_path = file.path;
 		this.pomoWorkBench.linkFile(file as TFile, null);
-		this.showWorkbench();
+		this.pomoWorkBench.view.redraw();
 	};
 
 	handleFileOpen = async (tFile: TFile):Promise<void> => {
-		this.opened_file_path = tFile.path;
-		if(this.pomoWorkBench.view) {
-			this.pomoWorkBench.view.redraw();
+		if(tFile) {
+			this.opened_file_path = tFile.path;
+			if (this.pomoWorkBench.view) {
+				this.pomoWorkBench.view.redraw();
+			}
 		}
 	}
 
@@ -458,7 +483,7 @@ export default class FlexiblePomoTimerPlugin extends Plugin {
 	}
 
 	private checkIfActive():boolean {
-		if (this.pomoWorkBench && this.pomoWorkBench.data.workbenchFiles.length) {
+		if (this.pomoWorkBench && this.pomoWorkBench.data.workbenchFiles.length && this.app.workspace.getActiveFile()) {
 			for (const currentFile of this.pomoWorkBench.data.workbenchFiles) {
 				if (currentFile.path === this.app.workspace.getActiveFile().path) {
 					return true;
@@ -469,7 +494,7 @@ export default class FlexiblePomoTimerPlugin extends Plugin {
 	}
 
 	private checkIfActiveTimerOn():boolean {
-		if (this.pomoWorkBench && this.pomoWorkBench.workItems.length) {
+		if (this.pomoWorkBench && this.pomoWorkBench.workItems.length && this.app.workspace.getActiveFile()) {
 			for (const currentItem of this.pomoWorkBench.workItems) {
 				if (currentItem.isStartedActiveNote &&  currentItem.activeNote.path === this.app.workspace.getActiveFile().path) {
 					return true;

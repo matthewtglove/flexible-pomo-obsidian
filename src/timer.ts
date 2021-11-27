@@ -387,8 +387,9 @@ export class Timer {
     /**************  Logging  **************/
     async logPomo(): Promise<void> {
         var logText = moment().format(this.settings.logText);
-        logText = '- ' + await this.extractLog(this.workItem, logText, false);
-
+        if(this.plugin.app.workspace.getActiveFile()) {
+            logText = '- ' + await this.extractLog(this.workItem, logText, false);
+        }
         for(const workItem of this.plugin.pomoWorkBench.workItems) {
             if(!workItem.isStartedActiveNote) {
                 logText =   await this.extractLog(workItem, logText, true);

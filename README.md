@@ -149,10 +149,10 @@ This will enable the user to log tasks added and completed with these multiple f
 
 ### Persistent Workbench
 
-Persisten workbenches enable you to save different types of Workbenches in a folder in your vault. This enables the plugin
+Persistent workbenches enable you to save different types of Workbenches in a folder in your vault. This enables the plugin
 to persist Workbenches across restart and enables the user to save different types of workbenches.
 
-Please be sure to set your workbench folder first.
+Please be sure to set your workbench folder first. Workbench Files that are saved will be placed in this folder.
 
 ![](pomopersistentfolder.GIF)
 
