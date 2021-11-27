@@ -52,7 +52,7 @@ Use keyboard shortcuts to make everything easier.
 - [ ] Pomo Workbench
   - [X] Track multiple files during a pomodoro period.
   - [X] Add current progres indicator.
-  - [ ] Add active file indicator in pomo workbench leaf.
+  - [X] Add active file indicator in pomo workbench leaf.
   - [ ] Add automatic Linking Mode.
   - [X] Option to have a persistent workbench
   - [X] Persistent work bench across restarts.
