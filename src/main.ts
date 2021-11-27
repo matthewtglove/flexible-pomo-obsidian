@@ -297,8 +297,8 @@ export default class FlexiblePomoTimerPlugin extends Plugin {
 		});
 
 		this.addCommand({
-			id: "flexible-save-workbench",
-			name: "Save Pomo Workbench",
+			id: "flexible-save-as-workbench",
+			name: "Save Pomo Workbench As",
 			callback: () => {
 				this.pomoWorkBench.modified = false;
 				this.saving_suggester.insert_template();
@@ -307,8 +307,8 @@ export default class FlexiblePomoTimerPlugin extends Plugin {
 		});
 
 		this.addCommand({
-			id: "flexible-persist-workbench",
-			name: "Persist Pomo Workbench",
+			id: "flexible-save-workbench",
+			name: "Save Pomo Workbench",
 			checkCallback: (checking) => {
 				if(this.settings.active_workbench_path) {
 					if(!checking) {

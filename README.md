@@ -58,6 +58,7 @@ Use keyboard shortcuts to make everything easier.
   - [X] Persistent work bench across restarts.
   - [X] Option to save workbench types.
   - [ ] Option to include Daily Note in WorkBench/logging.
+  - [X] Option to change order of notes in workbench.
 
 
 ## Settings
@@ -155,11 +156,11 @@ Please be sure to set your workbench folder first.
 
 ![](pomopersistentfolder.GIF)
 
-### Save Your WorkBench
+### Save Pomo Workbench As
 
 Save your workbench
 
-To make a workbench persistent, be sure to call **Save Pomo Workbench** command. 
+To make a workbench persistent, be sure to call **Save Pomo Workbench As** command. 
 
 ![](savepomoworkbench.GIF)
 
@@ -169,6 +170,13 @@ To make a workbench persistent, be sure to call **Save Pomo Workbench** command.
 Load a workbench  command loads previously created workbenches.
 
 ![](loadworkbench.GIF)
+
+
+### Sortable Workbench
+
+Additional commands have been added to sort the workbench contents. 
+
+![](sortableworkbench.gif)
 
 
 ### Additional Commands
@@ -189,7 +197,7 @@ Reveals the active Pomdoro note to the right pane.
 
 ![img_4.png](img_4.png)
 
-#### Save Pomo Workbench
+#### Save Pomo Workbench As
 
 Save the Pomo workbench to a file. You can choose a new one or an old one. Saving overrides all the contents of the file
 but history is still stored in your Workbench folder.
@@ -199,15 +207,10 @@ Files will be persisted in your workbench folder.
 ![](persistedworkbench2.png)
 
 
-#### Save PomoWorkbench
+#### Save Pomo Workbench
 
-Saves the current workbench into the Workbench folder. This command will always override the existing content. If you 
-want to save your changes, you can just use Persist Workbench.
-
-#### Persist Pomo Workbench
-
-Persist Pomo Workbench commands enable you to save the current state of your workbench if you linked or unlinked any files.
-A new version will be stored inside your Workbench file.
+Save Pomo Workbench commands enable you to save the current state of your workbench if you linked or unlinked any files.
+It can also be called when the order is changed. A new version will be stored inside your Workbench file.
 
 #### Load Pomo Workbench
 
@@ -232,4 +235,16 @@ Reveals the pomo workbench in the right leaf.
 #### Clear Pomo WorkBench
 
 Clears the pomo workbench. Active note will not be removed if timer is active and not on a break.
+
+#### Show Current Progress
+
+Invokes a modal that shows the current task items that are new or ticked during a Pomodoro sequence.
+
+#### Move Note Up
+
+Moves the current Active Note up in the Workbench.
+
+#### Move Note Down
+
+Moves the current Active Note down in the Workbench.
 
