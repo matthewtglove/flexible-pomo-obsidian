@@ -436,7 +436,16 @@ export default class FlexiblePomoTimerPlugin extends Plugin {
 	private readonly handleDelete = async (
 		file: TAbstractFile,
 	): Promise<void> => {
-		this.unlinkFile(file as TFile);
+		let workbenchFileToRemove:FilePath;
+		for(const workbenchFile of this.pomoWorkBench.data.workbenchFiles) {
+			if(workbenchFile.path === file.path) {
+				workbenchFileToRemove = workbenchFile;
+				break;
+			}
+		}
+		if(workbenchFileToRemove) {
+			this.unlinkFile(file as TFile);
+		}
 	};
 
 
@@ -467,9 +476,13 @@ export default class FlexiblePomoTimerPlugin extends Plugin {
 				this.pomoWorkBench.workItems.remove(workItemToRemove);
 			}
 		}
-		this.pomoWorkBench.modified = true;
-		this.opened_file_path = file.path;
-		this.pomoWorkBench.linkFile(file as TFile, null);
+		if(workbenchFileToRemove) {
+			this.pomoWorkBench.modified = true;
+			if(this.app.workspace.getActiveFile() && this.app.workspace.getActiveFile().path === file.path) {
+				this.opened_file_path = file.path;
+			}
+			this.pomoWorkBench.linkFile(file as TFile, null);
+		}
 		this.pomoWorkBench.view.redraw();
 	};
 
