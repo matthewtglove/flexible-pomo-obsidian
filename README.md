@@ -238,6 +238,12 @@ Reveals the pomo workbench in the right leaf.
 
 Clears the pomo workbench. Active note will not be removed if timer is active and not on a break.
 
+#### Toggle Workbench Location
+
+Changes the location of workbench from left to right or vice-versa.
+
+Note: Manual workbench moves are not tracked. You will need to trigger command twice.
+
 #### Show Current Progress
 
 Invokes a modal that shows the current task items that are new or ticked during a Pomodoro sequence.
