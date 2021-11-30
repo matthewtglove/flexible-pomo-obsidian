@@ -34,7 +34,9 @@ export class FileUtility {
                                 let tFile:TFile = this.plugin.app.vault.getAbstractFileByPath(normalizePath(csvEntry.trim())) as TFile;
                                 if(tFile) {
                                     if(tFile.name) {
-                                        this.plugin.pomoWorkBench.view.update(tFile);
+                                        if(this.plugin.pomoWorkBench.view) {
+                                            this.plugin.pomoWorkBench.view.update(tFile);
+                                        }
                                     }
                                 }
                             }
@@ -42,7 +44,7 @@ export class FileUtility {
                     }
                 }
             });
-            this.plugin.pomoWorkBench.view.redraw();
+            this.plugin.pomoWorkBench.redraw();
         }
     }
 
@@ -53,7 +55,7 @@ export class FileUtility {
             return;
         } else {
             this.saveWorkBenchSettings(targetFile);
-            this.plugin.pomoWorkBench.view.redraw();
+            this.plugin.pomoWorkBench.redraw();
             let text:string = "";
             text = text + "### " + moment().format('MM/DD/YYYY HH:mm:ss').toString() + "\n\n";
             for(const workItem of this.plugin.pomoWorkBench.workItems) {
@@ -80,7 +82,7 @@ export class FileUtility {
             return;
         } else {
             this.saveWorkBenchSettings(file);
-            this.plugin.pomoWorkBench.view.redraw();
+            this.plugin.pomoWorkBench.redraw();
             let text:string = "";
 
             text = text + "### " + moment().format('MM/DD/YYYY HH:mm:ss').toString() + "\n\n";

@@ -53,55 +53,55 @@ export class WorkbenchItemsListView extends ItemView {
     }
 
     public readonly redraw = (): void => {
-        let activeFile:TFile;
-        if(this.plugin.timer.workItem) {
-            activeFile = this.plugin.timer.workItem.activeNote;
-        }
-        const rootEl = createDiv({ cls: 'nav-folder mod-root' });
-        const childrenEl = rootEl.createDiv({ cls: 'nav-folder-children' });
-
-        if(this.plugin.settings.active_workbench_path && this.plugin.app.vault.getAbstractFileByPath(this.plugin.settings.active_workbench_path)) {
-            let workbenchFile:TFile = (this.plugin.app.vault.getAbstractFileByPath(this.plugin.settings.active_workbench_path) as TFile)
-            const navFile = childrenEl.createDiv({ cls: 'nav-file' });
-            const navFileTitle = navFile.createDiv({ cls: 'nav-file-title' });
-            if(this.workbench.modified) {
-                navFileTitle.createDiv({
-                    cls: 'nav-file-title-content',
-                    text: '?WORKBENCH: ' + workbenchFile.basename,
-                });
-            } else {
-                navFileTitle.createDiv({
-                    cls: 'nav-file-title-content',
-                    text: 'WORKBENCH: ' + workbenchFile.basename,
-                });
-
+            let activeFile:TFile;
+            if(this.plugin.timer.workItem) {
+                activeFile = this.plugin.timer.workItem.activeNote;
             }
-            this.addAttributesToNavFile(navFile, workbenchFile, rootEl);
-        }
-        if(this.data) {
-            this.data.workbenchFiles.forEach((currentFile) => {
+            const rootEl = createDiv({ cls: 'nav-folder mod-root' });
+            const childrenEl = rootEl.createDiv({ cls: 'nav-folder-children' });
+
+            if(this.plugin.settings.active_workbench_path && this.plugin.app.vault.getAbstractFileByPath(this.plugin.settings.active_workbench_path)) {
+                let workbenchFile:TFile = (this.plugin.app.vault.getAbstractFileByPath(this.plugin.settings.active_workbench_path) as TFile)
                 const navFile = childrenEl.createDiv({ cls: 'nav-file' });
                 const navFileTitle = navFile.createDiv({ cls: 'nav-file-title' });
-                if(activeFile && activeFile.path === currentFile.path) {
+                if(this.workbench.modified) {
                     navFileTitle.createDiv({
                         cls: 'nav-file-title-content',
-                        text: '*** ' + currentFile.basename + ' ***',
+                        text: '?WORKBENCH: ' + workbenchFile.basename,
                     });
                 } else {
                     navFileTitle.createDiv({
                         cls: 'nav-file-title-content',
-                        text: currentFile.basename,
+                        text: 'WORKBENCH: ' + workbenchFile.basename,
                     });
+
                 }
-                if(this.plugin.opened_file_path && currentFile.path === this.plugin.opened_file_path) {
-                    navFileTitle.addClass('red-background');
-                }
-                this.addAttributesToNavFile(navFile, currentFile, rootEl);
-            });
-        }
-        const contentEl = this.containerEl.children[1];
-        contentEl.empty();
-        contentEl.appendChild(rootEl);
+                this.addAttributesToNavFile(navFile, workbenchFile, rootEl);
+            }
+            if(this.data) {
+                this.data.workbenchFiles.forEach((currentFile) => {
+                    const navFile = childrenEl.createDiv({ cls: 'nav-file' });
+                    const navFileTitle = navFile.createDiv({ cls: 'nav-file-title' });
+                    if(activeFile && activeFile.path === currentFile.path) {
+                        navFileTitle.createDiv({
+                            cls: 'nav-file-title-content',
+                            text: '*** ' + currentFile.basename + ' ***',
+                        });
+                    } else {
+                        navFileTitle.createDiv({
+                            cls: 'nav-file-title-content',
+                            text: currentFile.basename,
+                        });
+                    }
+                    if(this.plugin.opened_file_path && currentFile.path === this.plugin.opened_file_path) {
+                        navFileTitle.addClass('red-background');
+                    }
+                    this.addAttributesToNavFile(navFile, currentFile, rootEl);
+                });
+            }
+            const contentEl = this.containerEl.children[1];
+            contentEl.empty();
+            contentEl.appendChild(rootEl);
     };
 
     private addAttributesToNavFile(navFile: HTMLDivElement, currentFile: FilePath, rootEl: HTMLDivElement) {

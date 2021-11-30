@@ -133,7 +133,7 @@ export class Timer {
                 this.pomosSinceStart += 1;
                 if (this.settings.logging === true) {
                     await this.logPomo();
-                    await this.plugin.pomoWorkBench.view.redraw();
+                    await this.plugin.pomoWorkBench.redraw();
                 }
             } else if (this.mode === Mode.ShortBreak || this.mode === Mode.LongBreak) {
                 this.cyclesSinceLastAutoStop += 1;
@@ -196,7 +196,7 @@ export class Timer {
 
         }
         this.plugin.pomoWorkBench.workItems = new Array<WorkItem>();
-        await this.plugin.pomoWorkBench.view.redraw();
+        await this.plugin.pomoWorkBench.redraw();
         //await this.plugin.loadSettings(); //w
         await this.plugin.saveSettings(); // save the setting to reflect the latest active workbench.
     }
@@ -207,7 +207,7 @@ export class Timer {
             this.plugin.timer.workItem = null;
         }
         if (this.plugin.pomoWorkBench && this.plugin.pomoWorkBench.view) {
-            this.plugin.pomoWorkBench.view.redraw();
+            this.plugin.pomoWorkBench.redraw();
         }
     }
 
@@ -273,7 +273,7 @@ export class Timer {
         } else {
             if(this.settings.active_workbench_path) {
                 this.plugin.pomoWorkBench.modified = false;
-                this.plugin.pomoWorkBench.view.redraw();
+                this.plugin.pomoWorkBench.redraw();
                 this.plugin.fileUtility.handleAppend(this.plugin.app.vault.getAbstractFileByPath(this.settings.active_workbench_path) as TFile);
             }
             //clear workbench items.
@@ -301,7 +301,7 @@ export class Timer {
         if (this.settings.whiteNoise === true) {
             this.whiteNoisePlayer.whiteNoise();
         }
-        this.plugin.pomoWorkBench.view.redraw();
+        this.plugin.pomoWorkBench.redraw();
     }
 
     setStartAndEndTime(millisecsLeft: number): void {

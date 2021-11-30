@@ -1,9 +1,10 @@
-import { App, Notice, PluginSettingTab, Setting } from 'obsidian';
+import {App, DropdownComponent, Notice, PluginSettingTab, Setting} from 'obsidian';
 import { appHasDailyNotesPluginLoaded } from 'obsidian-daily-notes-interface';
 import { whiteNoiseUrl } from './audio_urls';
 import FlexiblePomoTimerPlugin from './main';
 import { WhiteNoise } from './white_noise';
 import {FolderSuggest} from "./flexipomosuggesters/FolderSuggester";
+import {WorkbenchItemsListViewType} from "./workbench_data";
 
 export interface PomoSettings {
 	pomo: number;
@@ -30,6 +31,7 @@ export interface PomoSettings {
 	templates_folder: string;
 	active_workbench: string;
 	active_workbench_path: string;
+	workbench_location: string;
 }
 
 export const DEFAULT_SETTINGS: PomoSettings = {
@@ -57,6 +59,7 @@ export const DEFAULT_SETTINGS: PomoSettings = {
 	templates_folder: "",
 	active_workbench: "",
 	active_workbench_path: "",
+	workbench_location: "right",
 }
 
 
@@ -195,6 +198,24 @@ export class PomoSettingTab extends PluginSettingTab {
 				// @ts-ignore
 				cb.containerEl.addClass("flexible-pomo-search");
 			});
+
+		new Setting(this.containerEl)
+			.setName("Workbench Position")
+			.setDesc("Workbench Position in Workspace.")
+			.addDropdown(component => {
+				component.addOption("left", "Left").addOption("right", "Right").onChange(value => {
+					let oldValue:string =this.plugin.settings.workbench_location
+					this.plugin.settings.workbench_location = value;
+					if(value !== oldValue) {
+						if(this.plugin.pomoWorkBench.view) {
+							this.app.workspace.detachLeavesOfType(WorkbenchItemsListViewType);
+							this.plugin.pomoWorkBench.initView();
+						}
+					}
+				}).setValue(this.plugin.settings.workbench_location)
+			});
+
+
 
 		/**************  Logging settings **************/
 		new Setting(containerEl)

@@ -44,7 +44,7 @@ export default class FlexiblePomoWorkbench {
         if(fileToRemove) {
             this.data.workbenchFiles.remove(fileToRemove)
         }
-        await this.view.redraw();
+        await this.redraw();
     }
 
     public readonly pruneOmittedFiles = async (): Promise<void> => {
@@ -102,10 +102,22 @@ export default class FlexiblePomoWorkbench {
             //await leaf.setViewState({type: 'empty'});
             break;
         }
-        (leaf ?? this.plugin.app.workspace.getRightLeaf(false)).setViewState({
-            type: WorkbenchItemsListViewType,
-            active: true,
-        });
+        if(this.plugin.settings.workbench_location && this.plugin.settings.workbench_location === 'left') {
+            (leaf ?? this.plugin.app.workspace.getLeftLeaf(false)).setViewState({
+                type: WorkbenchItemsListViewType,
+                active: true,
+            });
+        } else if(this.plugin.settings.workbench_location && this.plugin.settings.workbench_location === 'right'){
+            (leaf ?? this.plugin.app.workspace.getRightLeaf(false)).setViewState({
+                type: WorkbenchItemsListViewType,
+                active: true,
+            });
+        } else {
+            (leaf ?? this.plugin.app.workspace.getRightLeaf(false)).setViewState({
+                type: WorkbenchItemsListViewType,
+                active: true,
+            });
+        }
     };
 
     linkFile = async (openedFile: TFile, initialWorkItems: PomoTaskItem[]): Promise<void> => {
@@ -155,12 +167,12 @@ export default class FlexiblePomoWorkbench {
                         return false;
                     }
                 })
-                this.view.redraw();
+                this.redraw();
             }
         } else {
             this.workItems = new Array<WorkItem>();
             this.data.workbenchFiles = new Array<FilePath>();
-            this.view.redraw();
+            this.redraw();
         }
     }
 
@@ -178,13 +190,13 @@ export default class FlexiblePomoWorkbench {
             if(hasMatch && (index - 1) >= 0) {
                 this.arrayMoveDatafile(this.data.workbenchFiles, index, index -1);
                 this.modified = true;
-                this.view.redraw();
+                this.redraw();
             }
         } else {
             if(hasMatch && (index) < this.data.workbenchFiles.length + 1) {
                 this.arrayMoveDatafile(this.data.workbenchFiles, index, index +1);
                 this.modified = true;
-                this.view.redraw();
+                this.redraw();
             }
         }
     }
@@ -203,13 +215,13 @@ export default class FlexiblePomoWorkbench {
             if (hasMatch && (index - 1) >= 0) {
                 this.arrayMoveWorkItem(this.workItems, index, index - 1);
                 this.modified = true;
-                this.view.redraw();
+                this.redraw();
             }
         } else {
             if (hasMatch && (index) < this.workItems.length + 1) {
                 this.arrayMoveWorkItem(this.workItems, index, index + 1);
                 this.modified = true;
-                this.view.redraw();
+                this.redraw();
             }
         }
     }
@@ -226,6 +238,12 @@ export default class FlexiblePomoWorkbench {
         let element = arr[fromIndex];
         arr.splice(fromIndex, 1);
         arr.splice(toIndex, 0, element);
+    }
+
+     redraw() {
+        if(this.view) {
+            this.view.redraw();
+        }
     }
 
 }

@@ -1,4 +1,4 @@
-import {addIcon, MarkdownView, Notice, Plugin, TAbstractFile, TFile} from 'obsidian';
+import {addIcon, MarkdownView, Notice, Plugin, TAbstractFile, TFile, WorkspaceLeaf} from 'obsidian';
 import * as feather from 'feather-icons'; //import just icons I want?
 import {DEFAULT_SETTINGS, PomoSettings, PomoSettingTab} from './settings';
 import {getDailyNoteFile, Mode, Timer} from './timer';
@@ -42,7 +42,7 @@ export default class FlexiblePomoTimerPlugin extends Plugin {
 				if((this.settings.logActiveNote && this.app.workspace.getActiveFile()) || (!this.settings.logActiveNote)) {
 					this.pomoWorkBench.modified = true;
 					this.timer.onRibbonIconClick();
-					this.pomoWorkBench.view.redraw();
+					this.pomoWorkBench.redraw();
 				} else {
 					if(this.settings.logActiveNote) {
 						new Notice('Please open an active note first.');
@@ -243,6 +243,24 @@ export default class FlexiblePomoTimerPlugin extends Plugin {
 		});
 
 		this.addCommand({
+			id: 'toggle-pomoworkbench-location',
+			name: 'Toggle Pomo Workbench Location',
+			icon: 'feather-show',
+			checkCallback: (checking) => {
+				if(this.pomoWorkBench.view && this.settings.workbench_location) {
+					if(!checking) {
+						this.settings.workbench_location === 'left' ? this.settings.workbench_location = 'right' : this.settings.workbench_location = 'left';
+						this.app.workspace.detachLeavesOfType(WorkbenchItemsListViewType);
+						this.showWorkbench();
+						this.saveSettings();
+					}
+					return true;
+				}
+				return false;
+			},
+		});
+
+		this.addCommand({
 			id: 'clear-pomoworkbench',
 			name: 'Clear Pomo Workbench',
 			icon: 'feather-clear',
@@ -310,7 +328,7 @@ export default class FlexiblePomoTimerPlugin extends Plugin {
 							this.pomoWorkBench.modified = false;
 							this.fileUtility.handleAppend(this.app.vault.getAbstractFileByPath(this.settings.active_workbench_path) as TFile);
 						}
-						this.pomoWorkBench.view.redraw();
+						this.pomoWorkBench.redraw();
 					}
 					return true;
 				}
@@ -403,7 +421,7 @@ export default class FlexiblePomoTimerPlugin extends Plugin {
 		 if(!this.app.workspace.getActiveFile()) {
 			 this.opened_file_path = '';
 		 }
-		 this.pomoWorkBench.view.redraw()
+		 this.pomoWorkBench.redraw()
 	 }
 
 
@@ -429,7 +447,7 @@ export default class FlexiblePomoTimerPlugin extends Plugin {
 					break;
 				}
 			}
-			this.pomoWorkBench.view.redraw();
+			this.pomoWorkBench.redraw();
 		}
 	}
 
@@ -483,15 +501,13 @@ export default class FlexiblePomoTimerPlugin extends Plugin {
 			}
 			this.pomoWorkBench.linkFile(file as TFile, null);
 		}
-		this.pomoWorkBench.view.redraw();
+		this.pomoWorkBench.redraw();
 	};
 
 	handleFileOpen = async (tFile: TFile):Promise<void> => {
 		if(tFile) {
 			this.opened_file_path = tFile.path;
-			if (this.pomoWorkBench.view) {
-				this.pomoWorkBench.view.redraw();
-			}
+			this.pomoWorkBench.redraw();
 		}
 	}
 
@@ -507,9 +523,19 @@ export default class FlexiblePomoTimerPlugin extends Plugin {
 		if (this.app.workspace.getLeavesOfType(WorkbenchItemsListViewType).length) {
 			await this.app.workspace.revealLeaf(this.app.workspace.getLeavesOfType(WorkbenchItemsListViewType).first());
 		} else {
-			 await this.app.workspace.getRightLeaf(false).setViewState({
-				type: WorkbenchItemsListViewType,
-			})
+			if(this.settings.workbench_location && this.settings.workbench_location === 'left') {
+				await this.app.workspace.getLeftLeaf(false).setViewState({
+					type: WorkbenchItemsListViewType,
+				})
+			} else if(this.settings.workbench_location && this.settings.workbench_location === 'right'){
+				await this.app.workspace.getRightLeaf(false).setViewState({
+					type: WorkbenchItemsListViewType,
+				})
+			} else {
+				await this.app.workspace.getRightLeaf(false).setViewState({
+					type: WorkbenchItemsListViewType,
+				})
+			}
 			await this.app.workspace.revealLeaf(this.app.workspace.getLeavesOfType(WorkbenchItemsListViewType).first());
 		}
 	}
@@ -576,5 +602,6 @@ export default class FlexiblePomoTimerPlugin extends Plugin {
 	async saveSettings() {
 		await this.saveData(this.settings);
 	}
+
 
 }
