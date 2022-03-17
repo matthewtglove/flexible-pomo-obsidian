@@ -327,6 +327,40 @@ export default class FlexiblePomoTimerPlugin extends Plugin {
 		});
 
 		this.addCommand({
+			id: 'show-all-open-tasks-active-note',
+			name: 'Show All Open Tasks Of Active Note',
+			icon: 'feather-show',
+			checkCallback: (checking) => {
+				if(this.timer.mode === Mode.Pomo) {
+					if(!checking) {
+						if(this.pomoWorkBench) {
+							this.pomoWorkBench.current_progress_modal.openProgressModal(3);
+						}
+					}
+					return true;
+				}
+				return false;
+			}
+		});
+
+		this.addCommand({
+			id: 'show-all-tasks-active-note',
+			name: 'Show All Tasks Of Active Note',
+			icon: 'feather-show',
+			checkCallback: (checking) => {
+				if(this.timer.mode === Mode.Pomo) {
+					if(!checking) {
+						if(this.pomoWorkBench) {
+							this.pomoWorkBench.current_progress_modal.openProgressModal(4);
+						}
+					}
+					return true;
+				}
+				return false;
+			}
+		});
+
+		this.addCommand({
 			id: 'toggle-flexible-pomo-white-noise',
 			name: 'Toggle White noise',
 			icon: 'feather-headphones',

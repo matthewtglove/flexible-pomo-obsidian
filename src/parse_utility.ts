@@ -25,9 +25,9 @@ export class ParseUtility {
         });
         activeFileContent.split("\n").forEach((value, index) => {
             if (value.trim().startsWith('- [ ]')) {
-                workItem.postPomoTaskItems.push( new PomoTaskItem(value.replace('- [ ]', ""), false));
+                workItem.postPomoTaskItems.push( new PomoTaskItem(value.replace('- [ ]', ""), false, workItem.activeNote.path));
             } else if (value.trim().startsWith('- [x]') || value.trim().startsWith('- [X]')) {
-                workItem.postPomoTaskItems.push(new PomoTaskItem(value.replace('- [x]', '').replace('- [X]', ''), true));
+                workItem.postPomoTaskItems.push(new PomoTaskItem(value.replace('- [x]', '').replace('- [X]', ''), true, workItem.activeNote.path));
             }
         })
         workItem.postPomoTaskItems.forEach((value, index, array) => {
@@ -50,9 +50,9 @@ export class ParseUtility {
     private processActiveFileContents(activeFileContent: string, pomoTaskItems: Array<PomoTaskItem>, isStore: boolean, newWorkItem: WorkItem) {
         activeFileContent.split("\n").forEach((value, index) => {
             if (value.trim().startsWith('- [ ]')) {
-                pomoTaskItems.push(new PomoTaskItem(value.replace('- [ ]', ""), false));
+                pomoTaskItems.push(new PomoTaskItem(value.replace('- [ ]', ""), false, newWorkItem.activeNote.path));
             } else if (value.trim().startsWith('- [x]') || value.trim().startsWith('- [X]')) {
-                pomoTaskItems.push(new PomoTaskItem(value.replace('- [x]', '').replace('- [X]', ''), true));
+                pomoTaskItems.push(new PomoTaskItem(value.replace('- [x]', '').replace('- [X]', ''), true, newWorkItem.activeNote.path));
             }
         })
         if (isStore) {

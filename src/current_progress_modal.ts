@@ -36,6 +36,22 @@ export class CurrentProgressModal extends Modal {
                 } else if(this.mode === 2) {
                     // Show All Items
                     workItems = newWorkItem.postPomoTaskItems;
+                } else if(this.mode === 3) {
+                    workItems = newWorkItem.postPomoTaskItems.filter((item) => {
+                        if(this.plugin.app.workspace.getActiveFile() && item.filePath === this.plugin.app.workspace.getActiveFile().path && !item.isCompleted) {
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    })
+                } else if(this.mode === 4) {
+                    workItems = newWorkItem.postPomoTaskItems.filter((item) => {
+                        if(this.plugin.app.workspace.getActiveFile() && item.filePath === this.plugin.app.workspace.getActiveFile().path) {
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    })
                 }
                 if (workItems.length) {
                     const div = ib.createDiv({
