@@ -52,21 +52,42 @@ export class CurrentProgressModal extends Modal {
                             return false;
                         }
                     })
+                } else if(this.mode === 5) {
+                    workItems = newWorkItem.postPomoTaskItems
+                    newWorkItem.hasActiveTask = false;
+                    if(workItems.length) {
+                        newWorkItem.postPomoTaskItems.forEach((x,i) => {
+                            if(!x.isCompleted) {
+                                newWorkItem.hasActiveTask = true;
+                            }
+                        });
+                    }
                 }
-                if (workItems.length) {
-                    const div = ib.createDiv({
-                        text: 'NOTE: ' + newWorkItem.activeNote.basename + "\n",
-                    })
-                    for (const workItemTask of workItems) {
-                        div.createDiv({
-                            text: '  --> ' + (workItemTask.isCompleted ? '[X] ' : '[ ] ') + '- ' + workItemTask.lineContent
+                if(this.mode === 5) {
+                    if (workItems.length) {
+                        if(newWorkItem.hasActiveTask) {
+                            ib.createDiv({
+                                text: 'NOTE: ' + newWorkItem.activeNote.basename + "\n",
+                            }).addClass('flexible-highlight-font');
+                        }
+                    }
+                } else {
+                    if (workItems.length) {
+                        const div = ib.createDiv({
+                            text: 'NOTE: ' + newWorkItem.activeNote.basename + "\n",
                         })
+                        div.addClass('flexible-highlight-font');
+                        const noteDiv = ib.createDiv('');
+                        for (const workItemTask of workItems) {
+                            noteDiv.createDiv({
+                                text: '  --> ' + (workItemTask.isCompleted ? '[X] ' : '[ ] ') + '- ' + workItemTask.lineContent
+                            })
+                        }
+                        noteDiv.createEl('br');
                     }
                 }
             }
-            })
-
-
+            }).then(() => {})
     }
 
     private async postPomo(newWorkItems: Array<WorkItem>):Promise<void> {

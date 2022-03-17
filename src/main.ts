@@ -361,6 +361,23 @@ export default class FlexiblePomoTimerPlugin extends Plugin {
 		});
 
 		this.addCommand({
+			id: 'show-notes-with-active-tasks',
+			name: 'Show Notes With Active Tasks',
+			icon: 'feather-show',
+			checkCallback: (checking) => {
+				if(this.timer.mode === Mode.Pomo) {
+					if(!checking) {
+						if(this.pomoWorkBench) {
+							this.pomoWorkBench.current_progress_modal.openProgressModal(5);
+						}
+					}
+					return true;
+				}
+				return false;
+			}
+		});
+
+		this.addCommand({
 			id: 'toggle-flexible-pomo-white-noise',
 			name: 'Toggle White noise',
 			icon: 'feather-headphones',

@@ -7,6 +7,7 @@ export class WorkItem {
     postPomoTaskItems:PomoTaskItem[];
     modifiedPomoTaskItems: PomoTaskItem[];
     isStartedActiveNote: boolean;
+    hasActiveTask: boolean;
 
     constructor(activeNote: TFile, isStartedActiveNote: boolean) {
         this.activeNote = activeNote;
