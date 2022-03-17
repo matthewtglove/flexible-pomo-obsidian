@@ -69,7 +69,8 @@ export class FileUtility {
             }
             text = text + "\n```\n";
             text = text + "\n\n";
-            await this.plugin.app.vault.modify(targetFile,text);
+            let existingContent = await this.plugin.app.vault.adapter.read(targetFile.path);
+            await this.plugin.app.vault.adapter.write(targetFile.path, existingContent + text);
 
         }
         //fuzzySuggester.close();
@@ -98,7 +99,8 @@ export class FileUtility {
             }
             text = text + "\n```\n";
             text = text + "\n\n";
-            await this.plugin.app.vault.modify(file, text);
+            let existingContent = await this.plugin.app.vault.adapter.read(file.path);
+            await this.plugin.app.vault.adapter.write(file.path, text);
         }
     }
 
