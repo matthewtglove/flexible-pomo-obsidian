@@ -69,7 +69,8 @@ export class FileUtility {
             }
             text = text + "\n```\n";
             text = text + "\n\n";
-            this.plugin.app.vault.append(targetFile,text);
+            await this.plugin.app.vault.modify(targetFile,text);
+
         }
         //fuzzySuggester.close();
     }
@@ -97,7 +98,7 @@ export class FileUtility {
             }
             text = text + "\n```\n";
             text = text + "\n\n";
-            this.plugin.app.vault.append(file,text);
+            await this.plugin.app.vault.modify(file, text);
         }
     }
 
