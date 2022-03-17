@@ -278,7 +278,41 @@ export default class FlexiblePomoTimerPlugin extends Plugin {
 				if(this.timer.mode === Mode.Pomo) {
 					if(!checking) {
 						if(this.pomoWorkBench) {
-							this.pomoWorkBench.current_progress_modal.open();
+							this.pomoWorkBench.current_progress_modal.openProgressModal(0);
+						}
+					}
+					return true;
+				}
+				return false;
+			}
+		});
+
+		this.addCommand({
+			id: 'show-open-tasks',
+			name: 'Show All Open Tasks',
+			icon: 'feather-show',
+			checkCallback: (checking) => {
+				if(this.timer.mode === Mode.Pomo) {
+					if(!checking) {
+						if(this.pomoWorkBench) {
+							this.pomoWorkBench.current_progress_modal.openProgressModal(1);
+						}
+					}
+					return true;
+				}
+				return false;
+			}
+		});
+
+		this.addCommand({
+			id: 'show-all-tasks',
+			name: 'Show All Tasks',
+			icon: 'feather-show',
+			checkCallback: (checking) => {
+				if(this.timer.mode === Mode.Pomo) {
+					if(!checking) {
+						if(this.pomoWorkBench) {
+							this.pomoWorkBench.current_progress_modal.openProgressModal(2);
 						}
 					}
 					return true;
