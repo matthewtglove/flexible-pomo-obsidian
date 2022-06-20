@@ -38,7 +38,7 @@ export class CurrentProgressModal extends Modal {
                     workItems = newWorkItem.postPomoTaskItems;
                 } else if(this.mode === 3) {
                     workItems = newWorkItem.postPomoTaskItems.filter((item) => {
-                        if(this.plugin.app.workspace.getActiveFile() && item.filePath === this.plugin.app.workspace.getActiveFile().path && !item.isCompleted) {
+                        if(this.plugin.app.workspace.lastActiveFile && item.filePath === this.plugin.app.workspace.lastActiveFile.path && !item.isCompleted) {
                             return true;
                         } else {
                             return false;
@@ -46,7 +46,7 @@ export class CurrentProgressModal extends Modal {
                     })
                 } else if(this.mode === 4) {
                     workItems = newWorkItem.postPomoTaskItems.filter((item) => {
-                        if(this.plugin.app.workspace.getActiveFile() && item.filePath === this.plugin.app.workspace.getActiveFile().path) {
+                        if(this.plugin.app.workspace.lastActiveFile && item.filePath === this.plugin.app.workspace.lastActiveFile.path) {
                             return true;
                         } else {
                             return false;

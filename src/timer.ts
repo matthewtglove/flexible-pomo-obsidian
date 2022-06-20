@@ -77,7 +77,7 @@ export class Timer {
                     }
                 }
                 /*if reaching the end of the current timer, end of current timer*/
-                else if (moment().isSameOrAfter(this.endTime)) {
+                else if (moment().isSameOrAfter(this.endTime.toDate())) {
                     if (!this.triggered && this.mode === Mode.Pomo) {
                         await this.handleTimerEnd();
                     } else {
@@ -241,10 +241,10 @@ export class Timer {
      startTimer(mode: Mode) {
         this.mode = mode;
         this.paused = false;
-        this.workItem = new WorkItem(this.plugin.app.workspace.getActiveFile(), true);
+        this.workItem = new WorkItem(this.plugin.app.workspace.lastActiveFile, true);
         if (mode === Mode.Pomo) {
             if (this.settings.logActiveNote === true) {
-                const activeView = this.plugin.app.workspace.getActiveFile();
+                const activeView = this.plugin.app.workspace.lastActiveFile;
                 if (activeView) {
                     this.workItem.activeNote = activeView;
                     if(this.plugin.pomoWorkBench.workItems.length) {
@@ -258,6 +258,7 @@ export class Timer {
                     for(const workBenchFile of this.plugin.pomoWorkBench.data.workbenchFiles) {
                         const tFile:TFile = this.plugin.app.vault.getAbstractFileByPath(workBenchFile.path) as TFile;
                         let workItem:WorkItem = new WorkItem(tFile, workBenchFile.path === this.workItem.activeNote.path ? true : false);
+                        debugger;
                         this.plugin.parseUtility.gatherLineItems(workItem, workItem.initialPomoTaskItems, true, workItem.activeNote);
                     }
                     this.plugin.pomoWorkBench.view.update(this.workItem.activeNote);
@@ -266,7 +267,8 @@ export class Timer {
                     //reset the pomo holders.
                     if(this.workItem) {
                         this.clearPomoTasks();
-                        this.plugin.parseUtility.gatherLineItems(this.workItem, this.workItem.initialPomoTaskItems, false, this.plugin.app.workspace.getActiveFile());
+                        debugger;
+                        this.plugin.parseUtility.gatherLineItems(this.workItem, this.workItem.initialPomoTaskItems, false, this.plugin.app.workspace.lastActiveFile);
                     }
                 }
             }
@@ -317,7 +319,7 @@ export class Timer {
 
     getStopwatch(): number {
         let startTimeClone = this.extendedTime.clone(); //rewrite with freeze?
-        return moment().diff(startTimeClone);
+        return moment().diff(startTimeClone.toDate());
     }
 
     getTotalModeMillisecs(): number {
@@ -387,7 +389,7 @@ export class Timer {
     /**************  Logging  **************/
     async logPomo(): Promise<void> {
         var logText = moment().format(this.settings.logText);
-        if(this.plugin.app.workspace.getActiveFile()) {
+        if(this.plugin.app.workspace.lastActiveFile) {
             logText = '- ' + await this.extractLog(this.workItem, logText, false);
         }
         for(const workItem of this.plugin.pomoWorkBench.workItems) {
@@ -420,7 +422,7 @@ export class Timer {
             }
             if (this.settings.logPomodoroDuration === true) {
                 if(!isWorkBench) {
-                    logText = logText + ' ' +  Math.floor(moment.duration(moment().diff(this.originalStartTime)).asMinutes()) + ' minute/s. ';
+                    logText = logText + ' ' +  Math.floor(moment.duration(moment().diff(this.originalStartTime.toDate())).asMinutes()) + ' minute/s. ';
                 }
             }
             if (this.settings.logPomodoroTasks === true) {
