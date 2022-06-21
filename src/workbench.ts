@@ -136,9 +136,8 @@ export default class FlexiblePomoWorkbench {
             }
         }
         if(this.plugin.timer.mode === Mode.Pomo) {
-            let newWorkItem = new WorkItem(this.plugin.app.workspace.lastActiveFile, false);
-            debugger;
-            await this.plugin.parseUtility.gatherLineItems(newWorkItem, newWorkItem.initialPomoTaskItems, true, this.plugin.app.workspace.lastActiveFile);
+            let newWorkItem = new WorkItem((this.plugin.app.workspace.getActiveFile() || this.plugin.app.workspace.lastActiveFile), false);
+            await this.plugin.parseUtility.gatherLineItems(newWorkItem, newWorkItem.initialPomoTaskItems, true, (this.plugin.app.workspace.getActiveFile() || this.plugin.app.workspace.lastActiveFile));
             if(initialWorkItems) {
                 newWorkItem.initialPomoTaskItems = initialWorkItems;
             }
@@ -181,7 +180,7 @@ export default class FlexiblePomoWorkbench {
         let index: number = 0;
         let hasMatch: boolean = false;
         for (const workbenchFile of this.data.workbenchFiles) {
-            if (workbenchFile.path === this.plugin.app.workspace.lastActiveFile.path) {
+            if (workbenchFile.path === (this.plugin.app.workspace.getActiveFile() ?  this.plugin.app.workspace.getActiveFile().path : this.plugin.app.workspace.lastActiveFile.path)) {
                 hasMatch = true;
                 break;
             }
@@ -206,7 +205,7 @@ export default class FlexiblePomoWorkbench {
         let index: number = 0;
         let hasMatch: boolean = false;
         for (const workItem of this.workItems) {
-            if (workItem.activeNote.path === this.plugin.app.workspace.lastActiveFile.path) {
+            if (workItem.activeNote.path === (this.plugin.app.workspace.getActiveFile() ? this.plugin.app.workspace.getActiveFile().path : this.plugin.app.workspace.lastActiveFile.path)) {
                 hasMatch = true;
                 break;
             }

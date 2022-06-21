@@ -241,10 +241,10 @@ export class Timer {
      startTimer(mode: Mode) {
         this.mode = mode;
         this.paused = false;
-        this.workItem = new WorkItem(this.plugin.app.workspace.lastActiveFile, true);
+        this.workItem = new WorkItem((this.plugin.app.workspace.getActiveFile() || this.plugin.app.workspace.lastActiveFile), true);
         if (mode === Mode.Pomo) {
             if (this.settings.logActiveNote === true) {
-                const activeView = this.plugin.app.workspace.lastActiveFile;
+                const activeView = (this.plugin.app.workspace.getActiveFile() || this.plugin.app.workspace.lastActiveFile);
                 if (activeView) {
                     this.workItem.activeNote = activeView;
                     if(this.plugin.pomoWorkBench.workItems.length) {
@@ -268,7 +268,7 @@ export class Timer {
                     if(this.workItem) {
                         this.clearPomoTasks();
                         debugger;
-                        this.plugin.parseUtility.gatherLineItems(this.workItem, this.workItem.initialPomoTaskItems, false, this.plugin.app.workspace.lastActiveFile);
+                        this.plugin.parseUtility.gatherLineItems(this.workItem, this.workItem.initialPomoTaskItems, false, (this.plugin.app.workspace.getActiveFile() || this.plugin.app.workspace.lastActiveFile));
                     }
                 }
             }
@@ -389,7 +389,7 @@ export class Timer {
     /**************  Logging  **************/
     async logPomo(): Promise<void> {
         var logText = moment().format(this.settings.logText);
-        if(this.plugin.app.workspace.lastActiveFile) {
+        if((this.plugin.app.workspace.getActiveFile() || this.plugin.app.workspace.lastActiveFile)) {
             logText = '- ' + await this.extractLog(this.workItem, logText, false);
         }
         for(const workItem of this.plugin.pomoWorkBench.workItems) {

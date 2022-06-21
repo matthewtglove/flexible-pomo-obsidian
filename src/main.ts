@@ -39,7 +39,7 @@ export default class FlexiblePomoTimerPlugin extends Plugin {
 		  if no timer is currently running, and otherwise quits current timer*/
 		if (this.settings.ribbonIcon === true) {
 			this.addRibbonIcon('clock', 'Start pomodoro', () => {
-				if((this.settings.logActiveNote && this.app.workspace.lastActiveFile) || (!this.settings.logActiveNote)) {
+				if((this.settings.logActiveNote && (this.app.workspace.getActiveFile() || this.app.workspace.lastActiveFile)) || (!this.settings.logActiveNote)) {
 					this.timer.onRibbonIconClick();
 					this.pomoWorkBench.redraw();
 					if(this.pomoWorkBench) {
@@ -90,12 +90,11 @@ export default class FlexiblePomoTimerPlugin extends Plugin {
 			name: 'Start Pomodoro',
 			icon: 'feather-play',
 			checkCallback: (checking:boolean) => {
-				if(this.settings.logActiveNote && !this.app.workspace.lastActiveFile) {
+				if(this.settings.logActiveNote && !(this.app.workspace.getActiveFile() || this.app.workspace.lastActiveFile)) {
 					return false;
 				}
 				if(this.timer.mode !== Mode.Pomo) {
 					if(!checking) {
-						debugger;
 						this.timer = new Timer(this);
 						this.timer.triggered = false;
 						this.showWorkbench();
@@ -208,7 +207,7 @@ export default class FlexiblePomoTimerPlugin extends Plugin {
 					return false;
 				} else {
 					if (!checking) {
-						this.pomoWorkBench.linkFile(this.app.workspace.lastActiveFile, null);
+						this.pomoWorkBench.linkFile((this.app.workspace.getActiveFile() || this.app.workspace.lastActiveFile), null);
 						this.savePomoWorkBench();
 						this.showWorkbench();
 						new Notice('Linking Active Note to Workbench');
@@ -232,7 +231,7 @@ export default class FlexiblePomoTimerPlugin extends Plugin {
 					return false;
 				}
 				if (!checking) {
-					this.unlinkFile(this.app.workspace.lastActiveFile);
+					this.unlinkFile((this.app.workspace.getActiveFile() || this.app.workspace.lastActiveFile));
 					this.savePomoWorkBench();
 				}
 				return true;
@@ -513,7 +512,7 @@ export default class FlexiblePomoTimerPlugin extends Plugin {
 	}
 
 	handleClose = async () => {
-		 if(!this.app.workspace.lastActiveFile) {
+		 if(!(this.app.workspace.getActiveFile() || this.app.workspace.lastActiveFile)) {
 			 this.opened_file_path = '';
 		 }
 		 this.pomoWorkBench.redraw()
@@ -591,7 +590,7 @@ export default class FlexiblePomoTimerPlugin extends Plugin {
 		}
 		if(workbenchFileToRemove) {
 			this.pomoWorkBench.modified = true;
-			if(this.app.workspace.lastActiveFile && this.app.workspace.lastActiveFile.path === file.path) {
+			if((this.app.workspace.getActiveFile() ? this.app.workspace.getActiveFile().path : this.app.workspace.lastActiveFile) === file.path) {
 				this.opened_file_path = file.path;
 			}
 			this.pomoWorkBench.linkFile(file as TFile, null);
@@ -637,9 +636,9 @@ export default class FlexiblePomoTimerPlugin extends Plugin {
 	}
 
 	private checkIfActive():boolean {
-		if (this.pomoWorkBench && this.pomoWorkBench.data.workbenchFiles.length && this.app.workspace.lastActiveFile) {
+		if (this.pomoWorkBench && this.pomoWorkBench.data.workbenchFiles.length && (this.app.workspace.getActiveFile() || this.app.workspace.lastActiveFile)) {
 			for (const currentFile of this.pomoWorkBench.data.workbenchFiles) {
-				if (currentFile.path === this.app.workspace.lastActiveFile.path) {
+				if (currentFile.path === (this.app.workspace.getActiveFile() ? this.app.workspace.getActiveFile().path : this.app.workspace.lastActiveFile.path)) {
 					return true;
 				}
 			}
@@ -648,9 +647,9 @@ export default class FlexiblePomoTimerPlugin extends Plugin {
 	}
 
 	private checkIfActiveTimerOn():boolean {
-		if (this.pomoWorkBench && this.pomoWorkBench.workItems.length && this.app.workspace.lastActiveFile) {
+		if (this.pomoWorkBench && this.pomoWorkBench.workItems.length && (this.app.workspace.getActiveFile() || this.app.workspace.lastActiveFile)) {
 			for (const currentItem of this.pomoWorkBench.workItems) {
-				if (currentItem.isStartedActiveNote &&  currentItem.activeNote.path === this.app.workspace.lastActiveFile.path) {
+				if (currentItem.isStartedActiveNote &&  currentItem.activeNote.path === (this.app.workspace.getActiveFile() ? this.app.workspace.getActiveFile().path : this.app.workspace.lastActiveFile.path)) {
 					return true;
 				}
 			}
