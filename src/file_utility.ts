@@ -51,7 +51,7 @@ export class FileUtility {
     async handleAppend(targetFile: TFile) {
         if (!targetFile) {
             // noinspection ObjectAllocationIgnored
-            new Notice("The file is not existing yet.");
+            //new Notice("The file is not existing yet.");
             return;
         } else {
             this.saveWorkBenchSettings(targetFile);
