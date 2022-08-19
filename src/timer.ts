@@ -17,7 +17,8 @@ export const enum Mode {
     Pomo,
     ShortBreak,
     LongBreak,
-    NoTimer
+    NoTimer,
+    Stopwatch
 }
 
 
@@ -68,26 +69,41 @@ export class Timer {
     //handling switching logic here, should spin out
     async setStatusBarText(): Promise<string> {
         if (this.mode !== Mode.NoTimer) {
-            if (this.extendPomodoroTime === false) {
-                if (this.paused === true) {
+            if(this.mode !== Mode.Stopwatch) {
+                if (this.extendPomodoroTime === false) {
+                    if (this.paused === true) {
+                        if(this.workItem) {
+                            return this.workItem.activeNote && this.plugin.settings.logActiveNote && this.plugin.settings.showActiveNoteInTimer ? '( ' + this.workItem.activeNote.basename + ' ) ' + millisecsToString(this.pausedTime) : millisecsToString(this.pausedTime); //just show the paused time
+                        } else {
+                            return millisecsToString(this.pausedTime); //just show the paused time
+                        }
+                    }
+                    /*if reaching the end of the current timer, end of current timer*/
+                    else if (moment().isSameOrAfter(this.endTime.toDate())) {
+                        if (!this.triggered && this.mode === Mode.Pomo) {
+                            await this.handleTimerEnd();
+                        } else {
+                            await this.handleTimerEnd();
+                        }
+                    }
                     if(this.workItem) {
-                        return this.workItem.activeNote && this.plugin.settings.logActiveNote && this.plugin.settings.showActiveNoteInTimer ? '( ' + this.workItem.activeNote.basename + ' ) ' + millisecsToString(this.pausedTime) : millisecsToString(this.pausedTime); //just show the paused time
+                        return this.workItem.activeNote && this.plugin.settings.logActiveNote && this.plugin.settings.showActiveNoteInTimer ? '( ' + this.workItem.activeNote.basename + ' ) ' + millisecsToString(this.getCountdown()) : millisecsToString(this.getCountdown()); //return display value
                     } else {
-                        return millisecsToString(this.pausedTime); //just show the paused time
+                        return  millisecsToString(this.getCountdown()); //return display value
                     }
-                }
-                /*if reaching the end of the current timer, end of current timer*/
-                else if (moment().isSameOrAfter(this.endTime.toDate())) {
-                    if (!this.triggered && this.mode === Mode.Pomo) {
-                        await this.handleTimerEnd();
-                    } else {
-                        await this.handleTimerEnd();
-                    }
-                }
-                if(this.workItem) {
-                    return this.workItem.activeNote && this.plugin.settings.logActiveNote && this.plugin.settings.showActiveNoteInTimer ? '( ' + this.workItem.activeNote.basename + ' ) ' + millisecsToString(this.getCountdown()) : millisecsToString(this.getCountdown()); //return display value
                 } else {
-                    return  millisecsToString(this.getCountdown()); //return display value
+                    if (this.paused === true) {
+                        if(this.workItem) {
+                            return this.workItem.activeNote && this.plugin.settings.logActiveNote && this.plugin.settings.showActiveNoteInTimer ? '( ' + this.workItem.activeNote.basename + ' ) ' + millisecsToString(this.pausedTime) : millisecsToString(this.pausedTime); //just show the paused time
+                        } else {
+                            return  millisecsToString(this.pausedTime); //just show the paused time
+                        }
+                    }
+                    if(this.workItem) {
+                        return this.workItem.activeNote && this.plugin.settings.logActiveNote && this.plugin.settings.showActiveNoteInTimer ? '( ' + this.workItem.activeNote.basename + ' ) ' + millisecsToString(this.getStopwatch()) : millisecsToString(this.getStopwatch()); //return display value
+                    } else {
+                        return millisecsToString(this.getStopwatch()); //return display value
+                    }
                 }
             } else {
                 if (this.paused === true) {
@@ -242,7 +258,7 @@ export class Timer {
         this.mode = mode;
         this.paused = false;
         this.workItem = new WorkItem((this.plugin.app.workspace.getActiveFile() || this.plugin.app.workspace.lastActiveFile), true);
-        if (mode === Mode.Pomo) {
+        if (mode === Mode.Pomo || mode === Mode.Stopwatch) {
             if (this.settings.logActiveNote === true) {
                 const activeView = (this.plugin.app.workspace.getActiveFile() || this.plugin.app.workspace.lastActiveFile);
                 if (activeView) {
@@ -258,7 +274,6 @@ export class Timer {
                     for(const workBenchFile of this.plugin.pomoWorkBench.data.workbenchFiles) {
                         const tFile:TFile = this.plugin.app.vault.getAbstractFileByPath(workBenchFile.path) as TFile;
                         let workItem:WorkItem = new WorkItem(tFile, workBenchFile.path === this.workItem.activeNote.path ? true : false);
-                        debugger;
                         this.plugin.parseUtility.gatherLineItems(workItem, workItem.initialPomoTaskItems, true, workItem.activeNote);
                     }
                     this.plugin.pomoWorkBench.view.update(this.workItem.activeNote);
@@ -267,7 +282,6 @@ export class Timer {
                     //reset the pomo holders.
                     if(this.workItem) {
                         this.clearPomoTasks();
-                        debugger;
                         this.plugin.parseUtility.gatherLineItems(this.workItem, this.workItem.initialPomoTaskItems, false, (this.plugin.app.workspace.getActiveFile() || this.plugin.app.workspace.lastActiveFile));
                     }
                 }
@@ -307,8 +321,13 @@ export class Timer {
     }
 
     setStartAndEndTime(millisecsLeft: number): void {
-        this.startTime = moment(); //start time to current time
-        this.endTime = moment().add(millisecsLeft, 'milliseconds');
+        this.startTime = moment();
+        if(this.mode !== Mode.Stopwatch) {
+            this.endTime = moment().add(millisecsLeft, 'milliseconds');
+        } else {
+            //set End time to null if stop watch.
+            this.endTime = null;//moment().add(100000000, 'milliseconds');
+        }
     }
 
     /*Return milliseconds left until end of timer*/
@@ -393,7 +412,11 @@ export class Timer {
             logText = '- ' + await this.extractLog(this.workItem, logText, false);
         }
         for(const workItem of this.plugin.pomoWorkBench.workItems) {
-            if(!workItem.isStartedActiveNote) {
+            if(this.mode !== Mode.Stopwatch) {
+                if(!workItem.isStartedActiveNote) {
+                    logText =   await this.extractLog(workItem, logText, true);
+                }
+            } else {
                 logText =   await this.extractLog(workItem, logText, true);
             }
         }

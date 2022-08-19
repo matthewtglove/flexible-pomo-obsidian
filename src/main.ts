@@ -1,4 +1,4 @@
-import {addIcon, MarkdownView, Notice, Plugin, TAbstractFile, TFile, WorkspaceLeaf} from 'obsidian';
+import {addIcon, MarkdownView, Notice, Plugin, TAbstractFile, TFile, WorkspaceLeaf, moment} from 'obsidian';
 import * as feather from 'feather-icons'; //import just icons I want?
 import {DEFAULT_SETTINGS, PomoSettings, PomoSettingTab} from './settings';
 import {getDailyNoteFile, Mode, Timer} from './timer';
@@ -10,7 +10,6 @@ import {WorkbenchItemsListView} from "./workbench_view";
 import {SavingSuggester} from "./flexipomosuggesters/SavingSuggester";
 import {LoadingSuggester} from "./flexipomosuggesters/LoadingSuggester";
 import {FileUtility} from "./file_utility";
-
 
 export default class FlexiblePomoTimerPlugin extends Plugin {
 	settings: PomoSettings;
@@ -38,7 +37,7 @@ export default class FlexiblePomoTimerPlugin extends Plugin {
 		/*Adds icon to the left side bar which starts the pomo timer when clicked
 		  if no timer is currently running, and otherwise quits current timer*/
 		if (this.settings.ribbonIcon === true) {
-			this.addRibbonIcon('clock', 'Start pomodoro', () => {
+			this.addRibbonIcon('clock', 'Start Pomodoro', () => {
 				if((this.settings.logActiveNote && (this.app.workspace.getActiveFile() || this.app.workspace.lastActiveFile)) || (!this.settings.logActiveNote)) {
 					this.timer.onRibbonIconClick();
 					this.pomoWorkBench.redraw();
@@ -93,7 +92,7 @@ export default class FlexiblePomoTimerPlugin extends Plugin {
 				if(this.settings.logActiveNote && !(this.app.workspace.getActiveFile() || this.app.workspace.lastActiveFile)) {
 					return false;
 				}
-				if(this.timer.mode !== Mode.Pomo) {
+				if(this.timer.mode !== Mode.Pomo && this.timer.mode !== Mode.Stopwatch) {
 					if(!checking) {
 						this.timer = new Timer(this);
 						this.timer.triggered = false;
@@ -111,11 +110,37 @@ export default class FlexiblePomoTimerPlugin extends Plugin {
 		});
 
 		this.addCommand({
+			id: 'start-flexible-stopwatch',
+			name: 'Start Stopwatch',
+			icon: 'feather-play',
+			checkCallback: (checking:boolean) => {
+				if(this.settings.logActiveNote && !(this.app.workspace.getActiveFile() || this.app.workspace.lastActiveFile)) {
+					return false;
+				}
+				if(this.timer.mode !== Mode.Stopwatch && this.timer.mode !== Mode.Pomo) {
+					if(!checking) {
+						this.timer = new Timer(this);
+						this.timer.triggered = false;
+						this.timer.extendedTime = moment();
+						this.showWorkbench();
+						this.timer.startTimer(Mode.Stopwatch);
+						if(this.pomoWorkBench) {
+							this.savePomoWorkBench();
+						}
+
+					}
+					return true;
+				}
+				return false;
+			}
+		});
+
+		this.addCommand({
 			id: 'log-and-quit-flexible-pomo',
 			name: 'Log Pomodoro Time and Quit.',
 			icon: 'feather-log-and-quit',
 			checkCallback: (checking: boolean) => {
-				if (this.timer.mode === Mode.Pomo && this.settings.logging) {
+				if ((this.timer.mode === Mode.Pomo || this.timer.mode === Mode.Stopwatch) && this.settings.logging) {
 					if (!checking) {
 						this.timer.extendPomodoroTime = false;
 						this.timer.triggered = false;
@@ -154,8 +179,14 @@ export default class FlexiblePomoTimerPlugin extends Plugin {
 			id: 'start-flexible-pomo-shortbreak',
 			name: 'Start Short Break',
 			icon: 'feather-play',
-			callback: () => {
-				this.timer.startTimer(Mode.ShortBreak);
+			checkCallback: (checking: boolean) => {
+				if (this.timer.mode !== Mode.Stopwatch) {
+					if (!checking) {
+						this.timer.startTimer(Mode.ShortBreak);
+					}
+					return true;
+				}
+				return false;
 			}
 		})
 
@@ -163,16 +194,22 @@ export default class FlexiblePomoTimerPlugin extends Plugin {
 			id: 'start-flexible-pomo-longbreak',
 			name: 'Start Long Break',
 			icon: 'feather-play',
-			callback: () => {
-				this.timer.startTimer(Mode.LongBreak);
+			checkCallback: (checking: boolean) => {
+				if (this.timer.mode !== Mode.Stopwatch) {
+					if (!checking) {
+						this.timer.startTimer(Mode.LongBreak);
+					}
+					return true;
+				}
+				return false;
 			}
 		})
 
 		this.addCommand({
 			id: 'pause-flexible-pomo',
-			name: 'Toggle timer pause',
+			name: 'Toggle Timer Pause',
 			checkCallback: (checking: boolean) => {
-				if (this.timer.mode !== Mode.NoTimer) {
+				if ((this.timer.mode !== Mode.NoTimer) && (this.timer.mode !== Mode.Stopwatch)) {
 					if (!checking) {
 						this.timer.togglePause();
 					}
@@ -185,7 +222,7 @@ export default class FlexiblePomoTimerPlugin extends Plugin {
 
 		this.addCommand({
 			id: 'quit-flexible-pomo',
-			name: 'Quit timer',
+			name: 'Quit Timer/Stopwatch',
 			icon: 'feather-quit',
 			checkCallback: (checking: boolean) => {
 				if (this.timer.mode !== Mode.NoTimer) {
@@ -609,7 +646,6 @@ export default class FlexiblePomoTimerPlugin extends Plugin {
 		for (const workBenchFile of this.pomoWorkBench.data.workbenchFiles) {
 			const tFile: TFile = this.app.vault.getAbstractFileByPath(workBenchFile.path) as TFile;
 			let workItem: WorkItem = new WorkItem(tFile, true);
-			debugger;
 			await this.parseUtility.gatherLineItems(workItem, workItem.initialPomoTaskItems, true, workItem.activeNote);
 		}
 	}
