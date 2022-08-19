@@ -4,6 +4,11 @@ Simple plugin that displays a [pomodoro timer](https://en.wikipedia.org/wiki/Pom
 
 ![timer screenshot](timer_screenshot.png)
 
+## What's New ?
+
+Added stopwatch functionality as an alternative to using Pomodoros.
+
+Run Command `Start Pomodoro Stopwatch`
 ## Use
 Click the clock icon in the left ribbon panel to start. Click again to toggle pause.
 
