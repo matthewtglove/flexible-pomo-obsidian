@@ -2,6 +2,7 @@ import {
     TFile,
     WorkspaceLeaf,
 } from 'obsidian';
+
 import FlexiblePomoTimerPlugin from "./main";
 import {WorkbenchItemsListView} from "./workbench_view";
 import {DEFAULT_DATA, defaultMaxLength, FilePath, WorkbenchItemsListViewType, WorkbenchFilesData} from "./workbench_data";
@@ -135,7 +136,7 @@ export default class FlexiblePomoWorkbench {
                 return;
             }
         }
-        if(this.plugin.timer.mode === Mode.Pomo) {
+        if(this.isActive()) {
             let newWorkItem = new WorkItem((this.plugin.app.workspace.getActiveFile() || this.plugin.app.workspace.lastActiveFile), false);
             await this.plugin.parseUtility.gatherLineItems(newWorkItem, newWorkItem.initialPomoTaskItems, true, (this.plugin.app.workspace.getActiveFile() || this.plugin.app.workspace.lastActiveFile));
             if(initialWorkItems) {
@@ -144,8 +145,12 @@ export default class FlexiblePomoWorkbench {
         }
     }
 
-     clearWorkBench() {
-        if (this.plugin.timer.mode === Mode.Pomo) {
+    private isActive() {
+        return this.plugin.timer.mode === Mode.Pomo || this.plugin.timer.mode === Mode.Stopwatch;
+    }
+
+    clearWorkBench() {
+        if (this.isActive()) {
             if (this.workItems.length) {
                 this.workItems = this.workItems.filter(value => {
                     if (value.isStartedActiveNote === false) {

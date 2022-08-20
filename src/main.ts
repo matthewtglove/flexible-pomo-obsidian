@@ -92,7 +92,7 @@ export default class FlexiblePomoTimerPlugin extends Plugin {
 				if(this.settings.logActiveNote && !(this.app.workspace.getActiveFile() || this.app.workspace.lastActiveFile)) {
 					return false;
 				}
-				if(this.timer.mode !== Mode.Pomo && this.timer.mode !== Mode.Stopwatch) {
+				if(this.isInactive()) {
 					if(!checking) {
 						this.timer = new Timer(this);
 						this.timer.triggered = false;
@@ -117,7 +117,7 @@ export default class FlexiblePomoTimerPlugin extends Plugin {
 				if(this.settings.logActiveNote && !(this.app.workspace.getActiveFile() || this.app.workspace.lastActiveFile)) {
 					return false;
 				}
-				if(this.timer.mode !== Mode.Stopwatch && this.timer.mode !== Mode.Pomo) {
+				if(this.isInactive()) {
 					if(!checking) {
 						this.timer = new Timer(this);
 						this.timer.triggered = false;
@@ -140,7 +140,7 @@ export default class FlexiblePomoTimerPlugin extends Plugin {
 			name: 'Log Pomodoro Time and Quit.',
 			icon: 'feather-log-and-quit',
 			checkCallback: (checking: boolean) => {
-				if ((this.timer.mode === Mode.Pomo || this.timer.mode === Mode.Stopwatch) && this.settings.logging) {
+				if (this.isActive() && this.settings.logging) {
 					if (!checking) {
 						this.timer.extendPomodoroTime = false;
 						this.timer.triggered = false;
@@ -157,7 +157,7 @@ export default class FlexiblePomoTimerPlugin extends Plugin {
 			name: 'Open Active Note',
 			icon: 'feather-open-active-note',
 			checkCallback: (checking: boolean) => {
-				if (this.timer.workItem && this.timer.workItem.activeNote && this.timer.mode === Mode.Pomo) {
+				if (this.timer.workItem && this.timer.workItem.activeNote && this.isActive()) {
 					if (!checking) {
 						let view = this.app.workspace.getActiveViewOfType(MarkdownView)
 						if ( view ) {
@@ -209,7 +209,7 @@ export default class FlexiblePomoTimerPlugin extends Plugin {
 			id: 'pause-flexible-pomo',
 			name: 'Toggle Timer Pause',
 			checkCallback: (checking: boolean) => {
-				if ((this.timer.mode !== Mode.NoTimer) && (this.timer.mode !== Mode.Stopwatch)) {
+				if (this.isInactive()) {
 					if (!checking) {
 						this.timer.togglePause();
 					}
@@ -259,7 +259,7 @@ export default class FlexiblePomoTimerPlugin extends Plugin {
 			name: 'Unlink File From Active Workbench',
 			icon: 'feather-remove',
 			checkCallback: (checking: boolean) => {
-				if(this.timer.mode === Mode.Pomo) {
+				if(this.isActive()) {
 					if(this.checkIfActiveTimerOn()) {
 						return false;
 					}
@@ -317,7 +317,7 @@ export default class FlexiblePomoTimerPlugin extends Plugin {
 			name: 'Show Current Progress',
 			icon: 'feather-show',
 			checkCallback: (checking) => {
-				if(this.timer.mode === Mode.Pomo) {
+				if(this.isActive()) {
 					if(!checking) {
 						if(this.pomoWorkBench) {
 							this.pomoWorkBench.current_progress_modal.openProgressModal(0);
@@ -334,7 +334,7 @@ export default class FlexiblePomoTimerPlugin extends Plugin {
 			name: 'Show All Open Tasks',
 			icon: 'feather-show',
 			checkCallback: (checking) => {
-				if(this.timer.mode === Mode.Pomo) {
+				if(this.isActive()) {
 					if(!checking) {
 						if(this.pomoWorkBench) {
 							this.pomoWorkBench.current_progress_modal.openProgressModal(1);
@@ -351,7 +351,7 @@ export default class FlexiblePomoTimerPlugin extends Plugin {
 			name: 'Show All Tasks',
 			icon: 'feather-show',
 			checkCallback: (checking) => {
-				if(this.timer.mode === Mode.Pomo) {
+				if(this.isActive()) {
 					if(!checking) {
 						if(this.pomoWorkBench) {
 							this.pomoWorkBench.current_progress_modal.openProgressModal(2);
@@ -368,7 +368,7 @@ export default class FlexiblePomoTimerPlugin extends Plugin {
 			name: 'Show All Open Tasks Of Active Note',
 			icon: 'feather-show',
 			checkCallback: (checking) => {
-				if(this.timer.mode === Mode.Pomo) {
+				if(this.isActive()) {
 					if(!checking) {
 						if(this.pomoWorkBench) {
 							this.pomoWorkBench.current_progress_modal.openProgressModal(3);
@@ -385,7 +385,7 @@ export default class FlexiblePomoTimerPlugin extends Plugin {
 			name: 'Show All Tasks Of Active Note',
 			icon: 'feather-show',
 			checkCallback: (checking) => {
-				if(this.timer.mode === Mode.Pomo) {
+				if(this.isActive()) {
 					if(!checking) {
 						if(this.pomoWorkBench) {
 							this.pomoWorkBench.current_progress_modal.openProgressModal(4);
@@ -402,7 +402,7 @@ export default class FlexiblePomoTimerPlugin extends Plugin {
 			name: 'Show Notes With Active Tasks',
 			icon: 'feather-show',
 			checkCallback: (checking) => {
-				if(this.timer.mode === Mode.Pomo) {
+				if(this.isActive()) {
 					if(!checking) {
 						if(this.pomoWorkBench) {
 							this.pomoWorkBench.current_progress_modal.openProgressModal(5);
@@ -457,7 +457,7 @@ export default class FlexiblePomoTimerPlugin extends Plugin {
 			id: "flexible-load-workbench",
 			name: "Load Pomo Workbench",
 			checkCallback: (checking) => {
-				if(this.timer.mode !== Mode.Pomo) {
+				if(this.isInactive()) {
 					if(!checking) {
 						this.loading_suggester.insert_template();
 					}
@@ -474,7 +474,7 @@ export default class FlexiblePomoTimerPlugin extends Plugin {
 				if(this.checkIfActive()) {
 					if(!checking) {
 						this.pomoWorkBench.shiftPositionDatafile(true);
-						if(this.timer && this.timer.mode === Mode.Pomo) {
+						if(this.timer && this.isActive()) {
 							this.pomoWorkBench.shiftPositionWorkItem(true);
 						}
 					}
@@ -491,7 +491,7 @@ export default class FlexiblePomoTimerPlugin extends Plugin {
 				if(this.checkIfActive()) {
 					if(!checking) {
 						this.pomoWorkBench.shiftPositionDatafile(false);
-						if(this.timer && this.timer.mode === Mode.Pomo) {
+						if(this.timer && this.isActive()) {
 							this.pomoWorkBench.shiftPositionWorkItem(false);
 						}
 					}
@@ -505,7 +505,7 @@ export default class FlexiblePomoTimerPlugin extends Plugin {
 			id: "flexible-unload-workbench",
 			name: "Unload Pomo Workbench",
 			checkCallback: (checking) => {
-				if(this.timer.mode !== Mode.Pomo && this.settings.active_workbench && this.settings.active_workbench_path) {
+				if((this.isInactive()) && this.settings.active_workbench && this.settings.active_workbench_path) {
 					if(!checking) {
 						this.settings.active_workbench_path = "";
 						this.settings.active_workbench = "";
@@ -534,8 +534,16 @@ export default class FlexiblePomoTimerPlugin extends Plugin {
 		this.registerEvent(this.app.vault.on('rename', this.handleRename));
 	}
 
+	private isActive() {
+		return this.timer.mode === Mode.Pomo || this.timer.mode === Mode.Stopwatch;
+	}
+
+	private isInactive() {
+		return this.timer.mode !== Mode.Stopwatch && this.timer.mode !== Mode.Pomo;
+	}
+
 	private savePomoWorkBench() {
-		if (this.timer.mode !== Mode.Pomo) {
+		if (this.isInactive()) {
 			this.pomoWorkBench.modified = false;
 			this.pomoWorkBench.workItems = new Array<WorkItem>();
 			this.extractWorkItems().then(value => {
@@ -558,7 +566,7 @@ export default class FlexiblePomoTimerPlugin extends Plugin {
 
 	private unlinkFile(tFile:TFile) {
 		let workItemToRemove: WorkItem;
-		if (this.timer.mode === Mode.Pomo) {
+		if (this.isActive()) {
 			for (const currentItem of this.pomoWorkBench.workItems) {
 				if (currentItem.activeNote.path === tFile.path) {
 					workItemToRemove = currentItem;
@@ -613,7 +621,7 @@ export default class FlexiblePomoTimerPlugin extends Plugin {
 		if(workbenchFileToRemove) {
 			this.pomoWorkBench.data.workbenchFiles.remove(workbenchFileToRemove);
 		}
-		if(this.timer.mode === Mode.Pomo) {
+		if(this.isActive()) {
 			let workItemToRemove:WorkItem;
 			for(const workItem of this.pomoWorkBench.workItems) {
 				if(workItem.activeNote.path === oldPath) {
