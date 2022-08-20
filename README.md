@@ -6,9 +6,23 @@ Simple plugin that displays a [pomodoro timer](https://en.wikipedia.org/wiki/Pom
 
 ## What's New ?
 
+### Stopwatch
 Added stopwatch functionality as an alternative to using Pomodoros.
 
 Run Command `Start Pomodoro Stopwatch`
+
+#### Custom Times
+
+Custom Pomodoro allows you to start a Pomodoro with custom times.
+
+![img_7.png](img_7.png)
+
+#### Additional Commands
+
+- Start Custom Pomodoro
+- Start Last Used Custom Pomodoro
+
+
 ## Use
 Click the clock icon in the left ribbon panel to start. Click again to toggle pause.
 

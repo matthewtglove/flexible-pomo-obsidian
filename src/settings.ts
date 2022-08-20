@@ -10,6 +10,10 @@ export interface PomoSettings {
 	pomo: number;
 	shortBreak: number;
 	longBreak: number;
+	pomoCustom: number;
+	customShortBreak: number;
+	customLongBreak: number;
+	lastUsedPomoType: string;
 	longBreakInterval: number;
 	autostartTimer: boolean;
 	numAutoCycles: number;
@@ -38,7 +42,11 @@ export const DEFAULT_SETTINGS: PomoSettings = {
 	pomo: 25,
 	shortBreak: 5,
 	longBreak: 15,
+	pomoCustom: 25,
+	customShortBreak: 5,
+	customLongBreak: 15,
 	longBreakInterval: 4,
+	lastUsedPomoType: "pomo",
 	autostartTimer: true,
 	numAutoCycles: 0,
 	ribbonIcon: true,

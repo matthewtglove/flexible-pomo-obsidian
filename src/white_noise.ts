@@ -17,7 +17,7 @@ export class WhiteNoise {
 	}
 
 	whiteNoise() {
-		if ((this.plugin.timer.mode === Mode.Pomo || this.plugin.timer.mode === Mode.Stopwatch) && this.plugin.timer.paused === false) {
+		if ((this.plugin.timer.mode === Mode.Pomo || this.plugin.timer.mode === Mode.Stopwatch || this.plugin.timer.mode === Mode.PomoCustom) && this.plugin.timer.paused === false) {
 			this.whiteNoisePlayer.play();
 		} else {
 			this.stopWhiteNoise();

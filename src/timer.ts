@@ -18,7 +18,10 @@ export const enum Mode {
     ShortBreak,
     LongBreak,
     NoTimer,
-    Stopwatch
+    Stopwatch,
+    PomoCustom,
+    ShortBreakCustom,
+    LongBreakCustom
 }
 
 
@@ -80,7 +83,7 @@ export class Timer {
                     }
                     /*if reaching the end of the current timer, end of current timer*/
                     else if (moment().isSameOrAfter(this.endTime.toDate())) {
-                        if (!this.triggered && this.mode === Mode.Pomo) {
+                        if (!this.triggered && (this.isPomo())) {
                             await this.handleTimerEnd();
                         } else {
                             await this.handleTimerEnd();
@@ -135,23 +138,23 @@ export class Timer {
     async handleTimerEnd() {
         this.triggered = true;
         this.pauseTimer();
-        if (this.settings.allowExtendedPomodoro && this.plugin.timer.allowExtendedPomodoroForSession && this.mode === Mode.Pomo) {
+        if (this.settings.allowExtendedPomodoro && this.plugin.timer.allowExtendedPomodoroForSession && this.isPomo()) {
             await confirmWithModal(this.plugin.app, "Do You Want To Extend Your Pomodoro Session ? ", this.plugin)
         } else {
             this.extendPomodoroTime = false;
         }
-        if (this.extendPomodoroTime && this.mode === Mode.Pomo) {
+        if (this.extendPomodoroTime && this.isPomo()) {
 
             this.restartTimer();
             this.extendedTime = moment();
         } else {
-            if (this.mode === Mode.Pomo) { //completed another pomo
+            if (this.isPomo()) { //completed another pomo
                 this.pomosSinceStart += 1;
                 if (this.settings.logging === true) {
                     await this.logPomo();
                     await this.plugin.pomoWorkBench.redraw();
                 }
-            } else if (this.mode === Mode.ShortBreak || this.mode === Mode.LongBreak) {
+            } else if (this.isPomoBreak()) {
                 this.cyclesSinceLastAutoStop += 1;
             }
 
@@ -166,8 +169,19 @@ export class Timer {
                 } else {
                     this.startTimer(Mode.ShortBreak);
                 }
+            } else if(this.mode === Mode.PomoCustom) {
+                if (this.pomosSinceStart % this.settings.longBreakInterval === 0) {
+                    this.startTimer(Mode.LongBreakCustom);
+                } else {
+                    this.startTimer(Mode.ShortBreakCustom);
+                }
             } else { //short break. long break, or no timer
-                this.startTimer(Mode.Pomo);
+                // check settings on what is currently set..
+                if(this.plugin.settings.lastUsedPomoType === "pomo-custom") {
+                    this.startTimer(Mode.PomoCustom);
+                } else {
+                    this.startTimer(Mode.Pomo);
+                }
             }
 
             if (this.settings.autostartTimer === false && this.settings.numAutoCycles <= this.cyclesSinceLastAutoStop) { //if autostart disabled, pause and allow user to start manually
@@ -176,6 +190,14 @@ export class Timer {
             }
         }
 
+    }
+
+    private isPomoBreak() {
+        return this.mode === Mode.ShortBreak || this.mode === Mode.LongBreak || this.mode === Mode.ShortBreakCustom || this.mode === Mode.LongBreakCustom;
+    }
+
+    private isPomo() {
+        return this.mode === Mode.Pomo || this.mode === Mode.PomoCustom;
     }
 
     private clearPomoTasks() {
@@ -255,10 +277,11 @@ export class Timer {
     }
 
      startTimer(mode: Mode) {
+
         this.mode = mode;
         this.paused = false;
         this.workItem = new WorkItem((this.plugin.app.workspace.getActiveFile() || this.plugin.app.workspace.lastActiveFile), true);
-        if (mode === Mode.Pomo || mode === Mode.Stopwatch) {
+        if (this.isActive(mode)) {
             if (this.settings.logActiveNote === true) {
                 const activeView = (this.plugin.app.workspace.getActiveFile() || this.plugin.app.workspace.lastActiveFile);
                 if (activeView) {
@@ -300,7 +323,7 @@ export class Timer {
         }
 
         if (this.settings.betterIndicator === true) {
-            if (mode === Mode.Pomo) {
+            if (this.isActive(mode)) {
                 const remote = electron.remote;
                 const BrowserWindow = remote.BrowserWindow;
                 const win = new BrowserWindow({
@@ -318,6 +341,10 @@ export class Timer {
             this.whiteNoisePlayer.whiteNoise();
         }
         this.plugin.pomoWorkBench.redraw();
+    }
+
+    private isActive(mode: Mode.ShortBreak | Mode.LongBreak | Mode.NoTimer | Mode.ShortBreakCustom | Mode.LongBreakCustom | Mode.Pomo | Mode.Stopwatch | Mode.PomoCustom) {
+        return mode === Mode.Pomo || mode === Mode.Stopwatch || mode === Mode.PomoCustom;
     }
 
     setStartAndEndTime(millisecsLeft: number): void {
@@ -355,6 +382,15 @@ export class Timer {
             case Mode.NoTimer: {
                 throw new Error("Mode NoTimer does not have an associated time value");
             }
+            case Mode.PomoCustom: {
+                return this.settings.pomoCustom * MILLISECS_IN_MINUTE;
+            }
+            case Mode.ShortBreakCustom: {
+                return this.settings.customShortBreak * MILLISECS_IN_MINUTE;
+            }
+            case Mode.LongBreakCustom: {
+                return this.settings.customLongBreak * MILLISECS_IN_MINUTE;
+            }
         }
     }
 
@@ -379,9 +415,18 @@ export class Timer {
                 new Notice(`Starting ${time} ${unit} pomodoro. \n` + (this.settings.logActiveNote && this.workItem.activeNote ? `(` + this.workItem.activeNote.basename + `)` : ``));
                 break;
             }
+            case (Mode.PomoCustom): {
+                new Notice(`Starting ${time} ${unit} custom pomodoro. \n` + (this.settings.logActiveNote && this.workItem.activeNote ? `(` + this.workItem.activeNote.basename + `)` : ``));
+                break;
+            }
             case (Mode.ShortBreak):
+            case (Mode.ShortBreakCustom):
             case (Mode.LongBreak): {
                 new Notice(`Starting ${time} ${unit} break.`);
+                break;
+            }
+            case (Mode.LongBreakCustom): {
+                new Notice(`Starting ${time} ${unit} custom break.`);
                 break;
             }
             case (Mode.NoTimer): {
@@ -397,9 +442,18 @@ export class Timer {
                 new Notice(`Restarting pomodoro.`);
                 break;
             }
+            case (Mode.PomoCustom): {
+                new Notice(`Restarting custom pomodoro.`);
+                break;
+            }
             case (Mode.ShortBreak):
+            case (Mode.ShortBreakCustom):
             case (Mode.LongBreak): {
                 new Notice(`Restarting break.`);
+                break;
+            }
+            case (Mode.LongBreakCustom): {
+                new Notice(`Restarting custom break.`);
                 break;
             }
         }

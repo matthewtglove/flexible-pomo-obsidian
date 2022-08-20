@@ -10,6 +10,7 @@ import {WorkbenchItemsListView} from "./workbench_view";
 import {SavingSuggester} from "./flexipomosuggesters/SavingSuggester";
 import {LoadingSuggester} from "./flexipomosuggesters/LoadingSuggester";
 import {FileUtility} from "./file_utility";
+import {askCustomTimeModal} from "./custom_time_modal";
 
 export default class FlexiblePomoTimerPlugin extends Plugin {
 	settings: PomoSettings;
@@ -94,6 +95,7 @@ export default class FlexiblePomoTimerPlugin extends Plugin {
 				}
 				if(this.isInactive()) {
 					if(!checking) {
+						this.settings.lastUsedPomoType = "pomo";
 						this.timer = new Timer(this);
 						this.timer.triggered = false;
 						this.showWorkbench();
@@ -101,7 +103,51 @@ export default class FlexiblePomoTimerPlugin extends Plugin {
 						if(this.pomoWorkBench) {
 							this.savePomoWorkBench();
 						}
+					}
+					return true;
+				}
+				return false;
+			}
+		});
 
+		this.addCommand({
+			id: 'start-flexible-pomo-custom-time',
+			name: 'Start Custom Pomodoro',
+			icon: 'feather-play',
+			checkCallback:  (checking: boolean) => {
+				if (this.settings.logActiveNote && !(this.app.workspace.getActiveFile() || this.app.workspace.lastActiveFile)) {
+					return false;
+				}
+				if (this.isInactive()) {
+					if (!checking) {
+						this.getAskCustomTimeModal();
+						// before starting pomodoro, we need to ask for the time via an input.
+					}
+					return true;
+				}
+				return false;
+			}
+		});
+
+		this.addCommand({
+			id: 'start-flexible-last-custom-pomo',
+			name: 'Start Last Custom Pomodoro',
+			icon: 'feather-play',
+			checkCallback:  (checking: boolean) => {
+				if (this.settings.logActiveNote && !(this.app.workspace.getActiveFile() || this.app.workspace.lastActiveFile)) {
+					return false;
+				}
+				if (this.isInactive()) {
+					if (!checking) {
+						this.settings.lastUsedPomoType = "pomo-custom";
+						this.timer = new Timer(this);
+						this.timer.triggered = false;
+						this.showWorkbench();
+						this.timer.startTimer(Mode.PomoCustom);
+						if(this.pomoWorkBench) {
+							this.savePomoWorkBench();
+						}
+						// before starting pomodoro, we need to ask for the time via an input.
 					}
 					return true;
 				}
@@ -534,15 +580,20 @@ export default class FlexiblePomoTimerPlugin extends Plugin {
 		this.registerEvent(this.app.vault.on('rename', this.handleRename));
 	}
 
+	async getAskCustomTimeModal() {
+		await askCustomTimeModal(this.app, "Please set your desired times.", this);
+
+	}
+
 	private isActive() {
-		return this.timer.mode === Mode.Pomo || this.timer.mode === Mode.Stopwatch;
+		return this.timer.mode === Mode.Pomo || this.timer.mode === Mode.Stopwatch || this.timer.mode === Mode.PomoCustom;
 	}
 
 	private isInactive() {
-		return this.timer.mode !== Mode.Stopwatch && this.timer.mode !== Mode.Pomo;
+		return this.timer.mode !== Mode.Stopwatch && this.timer.mode !== Mode.Pomo && this.timer.mode !== Mode.PomoCustom;
 	}
 
-	private savePomoWorkBench() {
+	 savePomoWorkBench() {
 		if (this.isInactive()) {
 			this.pomoWorkBench.modified = false;
 			this.pomoWorkBench.workItems = new Array<WorkItem>();
@@ -658,7 +709,7 @@ export default class FlexiblePomoTimerPlugin extends Plugin {
 		}
 	}
 
-	private  async showWorkbench() {
+	  async showWorkbench() {
 		if (this.app.workspace.getLeavesOfType(WorkbenchItemsListViewType).length) {
 			await this.app.workspace.revealLeaf(this.app.workspace.getLeavesOfType(WorkbenchItemsListViewType).first());
 		} else {
