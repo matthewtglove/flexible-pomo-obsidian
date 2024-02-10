@@ -10,7 +10,7 @@ import { flatten, uniq } from "./collection-helper";
 import { basename, dirname, extname } from "./path";
 
 export class AppHelper {
-  constructor(private app: App) {}
+  constructor(private app: App) { }
 
   getFolders(): TFolder[] {
     return this.app.vault
@@ -85,7 +85,7 @@ export class AppHelper {
     const linkText = this.app.fileManager.generateMarkdownLink(
       file,
       activeMarkdownView.file.path
-    );
+    ).replace(/^!/, "");
 
     const editor = activeMarkdownView.editor;
     editor.replaceRange(linkText, editor.getCursor("from"));
